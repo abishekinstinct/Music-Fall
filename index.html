@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="theme-color" content="#0b0712">
+    <meta name="description" content="My personal music player">
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="style.css">
+
+    <title>VibeMusic</title>
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="logo">
+            <div class="logo-icon">♫</div>
+            <span>VibeMusic</span>
+        </div>
+
+        <nav>
+
+            <button class="nav-btn active" data-page="home">
+                🏠 <span>Home</span>
+            </button>
+
+            <button class="nav-btn" data-page="library">
+                🎵 <span>Your Library</span>
+            </button>
+
+            <button class="nav-btn" data-page="liked">
+                ❤️ <span>Liked Songs</span>
+            </button>
+
+        </nav>
+
+        <div class="playlist-title">
+            PLAYLISTS
+            <button id="createPlaylist">＋</button>
+        </div>
+
+        <div id="playlistList"></div>
+
+        <div class="sidebar-bottom">
+            <button id="installButton" class="install-btn hidden">
+                📱 Install App
+            </button>
+
+            <small>VibeMusic Player</small>
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN -->
+    <main class="main">
+
+        <!-- TOP BAR -->
+        <header class="topbar">
+
+            <div class="mobile-logo">
+                ♫ VibeMusic
+            </div>
+
+            <div class="search-box">
+
+                <span>🔍</span>
+
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Search songs, artists..."
+                >
+
+                <button id="clearSearch">×</button>
+
+            </div>
+
+            <button class="add-song-btn" id="addSongButton">
+                ＋ Add Songs
+            </button>
+
+        </header>
+
+
+        <!-- PAGE CONTENT -->
+        <section id="content"></section>
+
+    </main>
+
+</div>
+
+
+<!-- MUSIC PLAYER -->
+
+<footer class="music-player">
+
+    <!-- CURRENT SONG -->
+
+    <div class="current-song">
+
+        <div id="playerCover" class="player-cover">
+            ♫
+        </div>
+
+        <div class="current-info">
+
+            <strong id="playerTitle">
+                Nothing Playing
+            </strong>
+
+            <span id="playerArtist">
+                Select a song
+            </span>
+
+        </div>
+
+        <button id="likeButton" class="heart-btn">
+            ♡
+        </button>
+
+    </div>
+
+
+    <!-- CONTROLS -->
+
+    <div class="player-center">
+
+        <div class="controls">
+
+            <button id="shuffleButton">
+                🔀
+            </button>
+
+            <button id="previousButton">
+                ⏮
+            </button>
+
+            <button id="playButton" class="play-button">
+                ▶
+            </button>
+
+            <button id="nextButton">
+                ⏭
+            </button>
+
+            <button id="repeatButton">
+                🔁
+            </button>
+
+        </div>
+
+
+        <div class="progress-container">
+
+            <span id="currentTime">
+                0:00
+            </span>
+
+            <input
+                type="range"
+                id="progressBar"
+                min="0"
+                max="100"
+                value="0"
+            >
+
+            <span id="duration">
+                0:00
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- VOLUME -->
+
+    <div class="volume-control">
+
+        <button id="muteButton">
+            🔊
+        </button>
+
+        <input
+            type="range"
+            id="volumeSlider"
+            min="0"
+            max="1"
+            step="0.01"
+            value="0.8"
+        >
+
+    </div>
+
+</footer>
+
+
+<!-- AUDIO ENGINE -->
+
+<audio id="audioPlayer"></audio>
+
+
+<!-- ADD SONG DIALOG -->
+
+<dialog id="addSongDialog">
+
+    <form method="dialog" id="addSongForm">
+
+        <h2>Add Songs</h2>
+
+        <p class="dialog-description">
+            Select one or multiple audio files.
+            They will be available in this browser.
+        </p>
+
+        <label class="upload-area">
+
+            <input
+                type="file"
+                id="songFiles"
+                accept="audio/*"
+                multiple
+            >
+
+            <div class="upload-icon">
+                🎵
+            </div>
+
+            <strong>
+                Choose music files
+            </strong>
+
+            <small>
+                MP3, M4A, WAV, OGG
+            </small>
+
+        </label>
+
+        <div id="selectedFiles"></div>
+
+        <div class="dialog-buttons">
+
+            <button value="cancel">
+                Cancel
+            </button>
+
+            <button
+                id="saveSongs"
+                class="primary-btn"
+                value="default"
+                disabled
+            >
+                Add Songs
+            </button>
+
+        </div>
+
+    </form>
+
+</dialog>
+
+
+<!-- CREATE PLAYLIST -->
+
+<dialog id="playlistDialog">
+
+    <form method="dialog" id="playlistForm">
+
+        <h2>Create Playlist</h2>
+
+        <input
+            id="playlistName"
+            type="text"
+            placeholder="My Playlist"
+            required
+        >
+
+        <div class="dialog-buttons">
+
+            <button value="cancel">
+                Cancel
+            </button>
+
+            <button
+                value="default"
+                class="primary-btn"
+            >
+                Create
+            </button>
+
+        </div>
+
+    </form>
+
+</dialog>
+
+
+<div id="toast"></div>
+
+
+<script src="app.js"></script>
+
+<script>
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js");
+    });
+}
+</script>
+
+</body>
+</html>
