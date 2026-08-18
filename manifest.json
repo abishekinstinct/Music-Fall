@@ -1,0 +1,19 @@
+{
+    "name": "VibeMusic",
+    "short_name": "VibeMusic",
+    "description": "My personal music player",
+    "start_url": "./",
+    "display": "standalone",
+    "background_color": "#08070d",
+    "theme_color": "#a855f7",
+    "orientation": "portrait"
+}{
+    "name": "VibeMusic",
+    "short_name": "VibeMusic",
+    "description": "My personal music player",
+    "start_url": "./",
+    "display": "standalone",
+    "background_color": "#08070d",
+    "theme_color": "#a855f7",
+    "orientation": "portrait"
+}
