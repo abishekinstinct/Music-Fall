@@ -5,7 +5,7 @@
         "artist": "Alex Warren",
         "album": "My Music",
         "cover": "",
-        "audio": "music/ordinary.mp3"
+        "audio": "https://abishekinstinct.github.io/Music-Fall/music/ordinary.mp3"
     },
     {
         "id": 2,
@@ -13,7 +13,7 @@
         "artist": "Bakermat",
         "album": "My Music",
         "cover": "",
-        "audio": "music/baby.mp3"
+        "audio": "https://abishekinstinct.github.io/Music-Fall/music/baby.mp3"
     },
     {
         "id": 3,
@@ -21,7 +21,7 @@
         "artist": "Charlie Puth ft. Selena Gomez",
         "album": "My Music",
         "cover": "",
-        "audio": "music/we-dont-talk-anymore.mp3"
+        "audio": "https://abishekinstinct.github.io/Music-Fall/music/we-dont-talk-anymore.mp3"
     },
     {
         "id": 4,
@@ -29,7 +29,7 @@
         "artist": "Dua Lipa ft. Miguel",
         "album": "My Music",
         "cover": "",
-        "audio": "music/lost-in-your-light.mp3"
+        "audio": "https://abishekinstinct.github.io/Music-Fall/music/lost-in-your-light.mp3"
     },
     {
         "id": 5,
@@ -37,7 +37,7 @@
         "artist": "Ed Sheeran",
         "album": "My Music",
         "cover": "",
-        "audio": "music/perfect.mp3"
+        "audio": "https://abishekinstinct.github.io/Music-Fall/music/perfect.mp3"
     },
     {
         "id": 6,
@@ -45,7 +45,7 @@
         "artist": "Ed Sheeran",
         "album": "My Music",
         "cover": "",
-        "audio": "music/shape-of-you.mp3"
+        "audio": "https://abishekinstinct.github.io/Music-Fall/music/shape-of-you.mp3"
     },
     {
         "id": 7,
@@ -53,7 +53,7 @@
         "artist": "Ellie Goulding",
         "album": "My Music",
         "cover": "",
-        "audio": "music/love-me-like-you-do.mp3"
+        "audio": "https://abishekinstinct.github.io/Music-Fall/music/love-me-like-you-do.mp3"
     },
     {
         "id": 8,
@@ -61,7 +61,7 @@
         "artist": "Future",
         "album": "My Music",
         "cover": "",
-        "audio": "music/mask-off.mp3"
+        "audio": "https://abishekinstinct.github.io/Music-Fall/music/mask-off.mp3"
     },
     {
         "id": 9,
@@ -69,7 +69,7 @@
         "artist": "Glass Animals",
         "album": "My Music",
         "cover": "",
-        "audio": "music/heat-waves.mp3"
+        "audio": "https://abishekinstinct.github.io/Music-Fall/music/heat-waves.mp3"
     },
     {
         "id": 10,
@@ -77,7 +77,7 @@
         "artist": "Imagine Dragons",
         "album": "My Music",
         "cover": "",
-        "audio": "music/believer.mp3"
+        "audio": "https://abishekinstinct.github.io/Music-Fall/music/believer.mp3"
     },
     {
         "id": 11,
@@ -85,7 +85,7 @@
         "artist": "The Kid LAROI & Justin Bieber",
         "album": "My Music",
         "cover": "",
-        "audio": "music/stay.mp3"
+        "audio": "https://abishekinstinct.github.io/Music-Fall/music/stay.mp3"
     },
     {
         "id": 12,
@@ -93,7 +93,7 @@
         "artist": "Alec Benjamin ft. Alessia Cara",
         "album": "My Music",
         "cover": "",
-        "audio": "music/let-me-down-slowly.mp3"
+        "audio": "https://abishekinstinct.github.io/Music-Fall/music/let-me-down-slowly.mp3"
     },
     {
         "id": 13,
@@ -101,7 +101,7 @@
         "artist": "Bright Sparks",
         "album": "My Music",
         "cover": "",
-        "audio": "music/on-my-way.mp3"
+        "audio": "https://abishekinstinct.github.io/Music-Fall/music/on-my-way.mp3"
     },
     {
         "id": 14,
@@ -109,7 +109,7 @@
         "artist": "Wiz Khalifa ft. Charlie Puth",
         "album": "My Music",
         "cover": "",
-        "audio": "music/see-you-again.mp3"
+        "audio": "https://abishekinstinct.github.io/Music-Fall/music/see-you-again.mp3"
     },
     {
         "id": 15,
@@ -117,7 +117,7 @@
         "artist": "Lewis Capaldi",
         "album": "My Music",
         "cover": "",
-        "audio": "music/someone-you-loved.mp3"
+        "audio": "https://abishekinstinct.github.io/Music-Fall/music/someone-you-loved.mp3"
     },
     {
         "id": 16,
@@ -125,7 +125,7 @@
         "artist": "Gym Class Heroes ft. Adam Levine",
         "album": "My Music",
         "cover": "",
-        "audio": "music/stereo-hearts.mp3"
+        "audio": "https://abishekinstinct.github.io/Music-Fall/music/stereo-hearts.mp3"
     },
     {
         "id": 17,
@@ -133,7 +133,7 @@
         "artist": "The Weeknd",
         "album": "My Music",
         "cover": "",
-        "audio": "music/sao-paulo.mp3"
+        "audio": "https://abishekinstinct.github.io/Music-Fall/music/sao-paulo.mp3"
     },
     {
         "id": 18,
@@ -141,7 +141,7 @@
         "artist": "The Weeknd",
         "album": "My Music",
         "cover": "",
-        "audio": "music/blinding-lights.mp3"
+        "audio": "https://abishekinstinct.github.io/Music-Fall/music/blinding-lights.mp3"
     },
     {
         "id": 19,
@@ -149,7 +149,7 @@
         "artist": "Christina Perri",
         "album": "My Music",
         "cover": "",
-        "audio": "music/a-thousand-years.mp3"
+        "audio": "https://abishekinstinct.github.io/Music-Fall/music/a-thousand-years.mp3"
     },
     {
         "id": 20,
@@ -157,6 +157,6 @@
         "artist": "Travis Scott",
         "album": "My Music",
         "cover": "",
-        "audio": "music/fein.mp3"
+        "audio": "https://abishekinstinct.github.io/Music-Fall/music/fein.mp3"
     }
 ]
