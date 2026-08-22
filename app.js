@@ -57,149 +57,7 @@ const playlistList = document.getElementById("playlistList");
    You can still add special artist information below.
    ========================================================= */
 
-let songs = [
-
-    {
-        id: "ordinary",
-        title: "Ordinary",
-        artist: "Alex Warren",
-        src: "music/ordinary.mp3"
-    },
-
-    {
-        id: "baby",
-        title: "Baby",
-        artist: "Bakermat",
-        src: "music/baby.mp3"
-    },
-
-    {
-        id: "we-dont-talk-anymore",
-        title: "We Don't Talk Anymore",
-        artist: "Charlie Puth ft. Selena Gomez",
-        src: "music/we-dont-talk-anymore.mp3"
-    },
-
-    {
-        id: "lost-in-your-light",
-        title: "Lost in Your Light",
-        artist: "Dua Lipa ft. Miguel",
-        src: "music/lost-in-your-light.mp3"
-    },
-
-    {
-        id: "perfect",
-        title: "Perfect",
-        artist: "Ed Sheeran",
-        src: "music/perfect.mp3"
-    },
-
-    {
-        id: "shape-of-you",
-        title: "Shape of You",
-        artist: "Ed Sheeran",
-        src: "music/shape-of-you.mp3"
-    },
-
-    {
-        id: "love-me-like-you-do",
-        title: "Love Me Like You Do",
-        artist: "Ellie Goulding",
-        src: "music/love-me-like-you-do.mp3"
-    },
-
-    {
-        id: "mask-off",
-        title: "Mask Off",
-        artist: "Future",
-        src: "music/mask-off.mp3"
-    },
-
-    {
-        id: "heat-waves",
-        title: "Heat Waves",
-        artist: "Glass Animals",
-        src: "music/heat-waves.mp3"
-    },
-
-    {
-        id: "believer",
-        title: "Believer",
-        artist: "Imagine Dragons",
-        src: "music/believer.mp3"
-    },
-
-    {
-        id: "stay",
-        title: "Stay",
-        artist: "The Kid LAROI & Justin Bieber",
-        src: "music/stay.mp3"
-    },
-
-    {
-        id: "let-me-down-slowly",
-        title: "Let Me Down Slowly",
-        artist: "Alec Benjamin ft. Alessia Cara",
-        src: "music/let-me-down-slowly.mp3"
-    },
-
-    {
-        id: "on-my-way",
-        title: "On My Way",
-        artist: "Bright Sparks",
-        src: "music/on-my-way.mp3"
-    },
-
-    {
-        id: "see-you-again",
-        title: "See You Again",
-        artist: "Wiz Khalifa ft. Charlie Puth",
-        src: "music/see-you-again.mp3"
-    },
-
-    {
-        id: "someone-you-loved",
-        title: "Someone You Loved",
-        artist: "Lewis Capaldi",
-        src: "music/someone-you-loved.mp3"
-    },
-
-    {
-        id: "stereo-hearts",
-        title: "Stereo Hearts",
-        artist: "Gym Class Heroes ft. Adam Levine",
-        src: "music/stereo-hearts.mp3"
-    },
-
-    {
-        id: "sao-paulo",
-        title: "São Paulo",
-        artist: "The Weeknd",
-        src: "music/sao-paulo.mp3"
-    },
-
-    {
-        id: "blinding-lights",
-        title: "Blinding Lights",
-        artist: "The Weeknd",
-        src: "music/blinding-lights.mp3"
-    },
-
-    {
-        id: "a-thousand-years",
-        title: "A Thousand Years",
-        artist: "Christina Perri",
-        src: "music/a-thousand-years.mp3"
-    },
-
-    {
-        id: "fein",
-        title: "FE!N",
-        artist: "Travis Scott",
-        src: "music/fein.mp3"
-    }
-
-];
+let songs = [];
 
 /* =========================================================
    STATE
@@ -328,72 +186,121 @@ function filenameToTitle(filename) {
    abishekinstinct/Music-Fall
    ========================================================= */
 
-async function loadMusicFolder() {
+/* =========================================================
+   LOAD SONGS FROM song.json
+   ========================================================= */
+
+const MUSIC_BASE_URL =
+    "https://abishekinstinct.github.io/Music-Fall/";
+
+const SONG_JSON_URL =
+    MUSIC_BASE_URL + "song.json";
+
+
+function makeAbsoluteAudioURL(path) {
+
+    if (!path) {
+        return "";
+    }
+
+    if (/^https?:\/\//i.test(path)) {
+        return path;
+    }
+
+    return new URL(
+        path.replace(/^\/+/, ""),
+        MUSIC_BASE_URL
+    ).href;
+
+}
+
+
+async function loadSongsFromJSON() {
 
     try {
 
         const response = await fetch(
-            "https://api.github.com/repos/abishekinstinct/Music-Fall/contents/music"
+            SONG_JSON_URL + "?v=" + Date.now(),
+            {
+                cache: "no-store"
+            }
         );
 
+
         if (!response.ok) {
+
             throw new Error(
-                `GitHub returned ${response.status}`
+                `song.json returned HTTP ${response.status}`
             );
-        }
 
-        const files = await response.json();
-
-        if (!Array.isArray(files)) {
-            throw new Error("Invalid music folder response");
         }
 
 
-        const mp3Files = files.filter(file => {
+        const data =
+            await response.json();
 
-            return (
-                file.type === "file" &&
-                /\.mp3$/i.test(file.name)
+
+        if (!Array.isArray(data)) {
+
+            throw new Error(
+                "song.json must contain an array."
             );
 
-        });
+        }
 
 
-        songs = mp3Files.map(file => {
+        songs = data
+            .filter(song =>
+                song &&
+                song.title &&
+                song.audio
+            )
+            .map((song, index) => {
 
-            const filename = file.name;
+                return {
 
-            const metadata =
-                songMetadata[filename] || null;
+                    id:
+                        String(
+                            song.id ??
+                            `song-${index + 1}`
+                        ),
 
+                    title:
+                        String(
+                            song.title
+                        ),
 
-            return {
+                    artist:
+                        String(
+                            song.artist ||
+                            "Unknown Artist"
+                        ),
 
-                id:
-                    "github-" +
-                    filename
-                        .toLowerCase()
-                        .replace(/[^a-z0-9]+/g, "-"),
+                    album:
+                        String(
+                            song.album ||
+                            "My Music"
+                        ),
 
-                title:
-                    metadata?.title ||
-                    filenameToTitle(filename),
+                    cover:
+                        song.cover
+                            ? makeAbsoluteAudioURL(
+                                song.cover
+                            )
+                            : "",
 
-                artist:
-                    metadata?.artist ||
-                    "Unknown Artist",
+                    src:
+                        makeAbsoluteAudioURL(
+                            song.audio
+                        )
 
-                src:
-                    "music/" +
-                    encodeURIComponent(filename)
+                };
 
-            };
-
-        });
+            });
 
 
         console.log(
-            `VibeMusic loaded ${songs.length} songs.`
+            `VibeMusic loaded ${songs.length} songs from song.json.`
         );
 
 
@@ -405,7 +312,7 @@ async function loadMusicFolder() {
         if (songs.length === 0) {
 
             showToast(
-                "No MP3 files found in music/"
+                "No songs found in song.json"
             );
 
         } else {
@@ -416,50 +323,25 @@ async function loadMusicFolder() {
 
         }
 
+
     } catch (error) {
 
         console.error(
-            "Could not load music folder:",
+            "Could not load song.json:",
             error
         );
 
 
-        /*
-         * Fallback to the songs we know about.
-         * This allows the player to continue working
-         * even if GitHub API temporarily fails.
-         */
-
-        songs = Object.entries(songMetadata)
-            .map(([filename, metadata]) => {
-
-                return {
-
-                    id:
-                        "github-" +
-                        filename
-                            .replace(/[^a-z0-9]/gi, "-")
-                            .toLowerCase(),
-
-                    title:
-                        metadata.title,
-
-                    artist:
-                        metadata.artist,
-
-                    src:
-                        "music/" +
-                        encodeURIComponent(filename)
-
-                };
-
-            });
+        songs = [];
 
 
         renderCurrentPage();
 
+        updatePlayerUI();
+
+
         showToast(
-            "Could not scan music folder. Showing available songs."
+            "Could not load song.json. Check GitHub."
         );
 
     }
@@ -2906,4 +2788,4 @@ updatePlayerUI();
 /*
  * Load ALL songs from GitHub.
  */
-loadMusicFolder();
+loadSongsFromJSON();
