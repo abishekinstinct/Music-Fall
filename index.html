@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta name="theme-color" content="#0b0712">
-    <meta name="description" content="My personal music player">
+    <meta name="theme-color" content="#090712">
+    <meta name="description" content="VibeMusic - Your personal music player">
 
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
@@ -17,7 +17,8 @@
 
 <div class="app">
 
-    <!-- SIDEBAR -->
+    <!-- ================= SIDEBAR ================= -->
+
     <aside class="sidebar">
 
         <div class="logo">
@@ -25,72 +26,108 @@
             <span>VibeMusic</span>
         </div>
 
-        <nav>
+        <nav class="main-nav">
 
             <button class="nav-btn active" data-page="home">
-                🏠 <span>Home</span>
+                <span class="nav-icon">⌂</span>
+                <span>Home</span>
             </button>
 
             <button class="nav-btn" data-page="library">
-                🎵 <span>Your Library</span>
+                <span class="nav-icon">♫</span>
+                <span>Your Library</span>
             </button>
 
             <button class="nav-btn" data-page="liked">
-                ❤️ <span>Liked Songs</span>
+                <span class="nav-icon heart-icon">♥</span>
+                <span>Favorites</span>
+            </button>
+
+            <button class="nav-btn" data-page="recent">
+                <span class="nav-icon">◷</span>
+                <span>Recently Played</span>
             </button>
 
         </nav>
 
-        <div class="playlist-title">
-            PLAYLISTS
-            <button id="createPlaylist">＋</button>
+
+        <div class="sidebar-section">
+
+            <div class="sidebar-title">
+                <span>PLAYLISTS</span>
+
+                <button
+                    id="createPlaylist"
+                    class="add-playlist-btn"
+                    title="Create playlist">
+                    +
+                </button>
+            </div>
+
+            <div id="playlistList"></div>
+
         </div>
 
-        <div id="playlistList"></div>
 
         <div class="sidebar-bottom">
-            <button id="installButton" class="install-btn hidden">
-                📱 Install App
+
+            <button
+                id="installButton"
+                class="install-btn hidden">
+                <span>📱</span>
+                Install App
             </button>
 
-            <small>VibeMusic Player</small>
+            <small>
+                VibeMusic Player
+            </small>
+
         </div>
 
     </aside>
 
 
-    <!-- MAIN -->
+    <!-- ================= MAIN ================= -->
+
     <main class="main">
 
-        <!-- TOP BAR -->
         <header class="topbar">
 
             <div class="mobile-logo">
-                ♫ VibeMusic
+                <span>♫</span>
+                VibeMusic
             </div>
 
             <div class="search-box">
 
-                <span>🔍</span>
+                <span class="search-icon">⌕</span>
 
                 <input
                     type="text"
                     id="searchInput"
                     placeholder="Search songs, artists..."
-                >
+                    autocomplete="off">
 
-                <button id="clearSearch">×</button>
+                <button
+                    id="clearSearch"
+                    class="clear-search">
+                    ×
+                </button>
 
             </div>
 
-            <button class="add-song-btn" id="addSongButton">
-                ＋ Add Songs
+            <button
+                class="add-song-btn"
+                id="addSongButton">
+
+                <span>＋</span>
+                Add Songs
+
             </button>
 
         </header>
 
 
-        <!-- PAGE CONTENT -->
         <section id="content"></section>
 
     </main>
@@ -98,7 +135,7 @@
 </div>
 
 
-<!-- MUSIC PLAYER -->
+<!-- ================= MUSIC PLAYER ================= -->
 
 <footer class="music-player">
 
@@ -106,9 +143,14 @@
 
     <div class="current-song">
 
-        <div id="playerCover" class="player-cover">
-            ♫
+        <div
+            id="playerCover"
+            class="player-cover">
+
+            <span>♫</span>
+
         </div>
+
 
         <div class="current-info">
 
@@ -122,37 +164,72 @@
 
         </div>
 
-        <button id="likeButton" class="heart-btn">
+
+        <button
+            id="likeButton"
+            class="heart-btn"
+            title="Add to favorites">
+
             ♡
+
         </button>
 
     </div>
 
 
-    <!-- CONTROLS -->
+    <!-- PLAYER CENTER -->
 
     <div class="player-center">
 
         <div class="controls">
 
-            <button id="shuffleButton">
+            <button
+                id="shuffleButton"
+                class="control-btn"
+                title="Shuffle">
+
                 🔀
+
             </button>
 
-            <button id="previousButton">
+
+            <button
+                id="previousButton"
+                class="control-btn"
+                title="Previous">
+
                 ⏮
+
             </button>
 
-            <button id="playButton" class="play-button">
+
+            <button
+                id="playButton"
+                class="play-button"
+                title="Play">
+
                 ▶
+
             </button>
 
-            <button id="nextButton">
+
+            <button
+                id="nextButton"
+                class="control-btn"
+                title="Next">
+
                 ⏭
+
             </button>
 
-            <button id="repeatButton">
+
+            <button
+                id="repeatButton"
+                class="control-btn"
+                title="Repeat">
+
                 🔁
+
             </button>
 
         </div>
@@ -164,13 +241,15 @@
                 0:00
             </span>
 
+
             <input
                 type="range"
                 id="progressBar"
                 min="0"
                 max="100"
                 value="0"
-            >
+                step="0.1">
+
 
             <span id="duration">
                 0:00
@@ -185,9 +264,14 @@
 
     <div class="volume-control">
 
-        <button id="muteButton">
+        <button
+            id="muteButton"
+            title="Mute">
+
             🔊
+
         </button>
+
 
         <input
             type="range"
@@ -195,30 +279,33 @@
             min="0"
             max="1"
             step="0.01"
-            value="0.8"
-        >
+            value="0.8">
 
     </div>
 
 </footer>
 
 
-<!-- AUDIO ENGINE -->
+<!-- AUDIO -->
 
-<audio id="audioPlayer"></audio>
+<audio
+    id="audioPlayer"
+    preload="metadata">
+</audio>
 
 
-<!-- ADD SONG DIALOG -->
+<!-- ================= ADD SONG DIALOG ================= -->
 
 <dialog id="addSongDialog">
 
-    <form method="dialog" id="addSongForm">
+    <form
+        method="dialog"
+        id="addSongForm">
 
         <h2>Add Songs</h2>
 
         <p class="dialog-description">
-            Select one or multiple audio files.
-            They will be available in this browser.
+            Select one or more music files.
         </p>
 
         <label class="upload-area">
@@ -227,8 +314,7 @@
                 type="file"
                 id="songFiles"
                 accept="audio/*"
-                multiple
-            >
+                multiple>
 
             <div class="upload-icon">
                 🎵
@@ -244,7 +330,9 @@
 
         </label>
 
+
         <div id="selectedFiles"></div>
+
 
         <div class="dialog-buttons">
 
@@ -256,9 +344,10 @@
                 id="saveSongs"
                 class="primary-btn"
                 value="default"
-                disabled
-            >
+                disabled>
+
                 Add Songs
+
             </button>
 
         </div>
@@ -268,32 +357,78 @@
 </dialog>
 
 
-<!-- CREATE PLAYLIST -->
+<!-- ================= PLAYLIST DIALOG ================= -->
+
+<!-- ================= PLAYLIST DIALOG ================= -->
 
 <dialog id="playlistDialog">
 
-    <form method="dialog" id="playlistForm">
+    <form id="playlistForm">
 
-        <h2>Create Playlist</h2>
+        <div class="playlist-dialog-header">
+
+            <div>
+                <h2>Create Playlist</h2>
+
+                <p>
+                    Choose songs from your VibeMusic library.
+                </p>
+            </div>
+
+            <button
+                type="button"
+                id="closePlaylistDialog"
+                class="dialog-close">
+                ×
+            </button>
+
+        </div>
+
 
         <input
             id="playlistName"
             type="text"
-            placeholder="My Playlist"
-            required
-        >
+            placeholder="Playlist name..."
+            maxlength="50"
+            required>
+
+
+        <div class="playlist-song-header">
+
+            <strong>
+                Select Songs
+            </strong>
+
+            <span id="selectedSongCount">
+                0 selected
+            </span>
+
+        </div>
+
+
+        <div
+            id="playlistSongSelector"
+            class="playlist-song-selector">
+        </div>
+
 
         <div class="dialog-buttons">
 
-            <button value="cancel">
+            <button
+                type="button"
+                id="cancelPlaylist"
+                class="secondary-btn">
+
                 Cancel
+
             </button>
 
             <button
-                value="default"
-                class="primary-btn"
-            >
-                Create
+                type="submit"
+                class="primary-btn">
+
+                Create Playlist
+
             </button>
 
         </div>
@@ -301,19 +436,28 @@
     </form>
 
 </dialog>
-
-
 <div id="toast"></div>
 
 
 <script src="app.js"></script>
 
+
 <script>
+
 if ("serviceWorker" in navigator) {
+
     window.addEventListener("load", () => {
-        navigator.serviceWorker.register("service-worker.js");
+
+        navigator.serviceWorker
+            .register("service-worker.js")
+            .catch(error => {
+                console.log("Service worker error:", error);
+            });
+
     });
+
 }
+
 </script>
 
 </body>
