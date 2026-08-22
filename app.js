@@ -1,34 +1,593 @@
+/* =========================================================
+   VIBEMUSIC PLAYER
+========================================================= */
+
 const audio = document.getElementById("audioPlayer");
 
+const content = document.getElementById("content");
+
+const playButton = document.getElementById("playButton");
+const previousButton = document.getElementById("previousButton");
+const nextButton = document.getElementById("nextButton");
+
+const shuffleButton = document.getElementById("shuffleButton");
+const repeatButton = document.getElementById("repeatButton");
+
+const progressBar = document.getElementById("progressBar");
+
+const currentTimeEl = document.getElementById("currentTime");
+const durationEl = document.getElementById("duration");
+
+const playerTitle = document.getElementById("playerTitle");
+const playerArtist = document.getElementById("playerArtist");
+
+const playerCover = document.getElementById("playerCover");
+
+const likeButton = document.getElementById("likeButton");
+
+const volumeSlider = document.getElementById("volumeSlider");
+const muteButton = document.getElementById("muteButton");
+
+const searchInput = document.getElementById("searchInput");
+const clearSearch = document.getElementById("clearSearch");
+
+const addSongButton = document.getElementById("addSongButton");
+const addSongDialog = document.getElementById("addSongDialog");
+
+const songFiles = document.getElementById("songFiles");
+const selectedFiles = document.getElementById("selectedFiles");
+const saveSongs = document.getElementById("saveSongs");
+
+const playlistDialog = document.getElementById("playlistDialog");
+const playlistForm = document.getElementById("playlistForm");
+const playlistName = document.getElementById("playlistName");
+
+const playlistList = document.getElementById("playlistList");
+
+const createPlaylist = document.getElementById("createPlaylist");
+
+const toast = document.getElementById("toast");
+
+
+/* =========================================================
+   DATA
+========================================================= */
+
 let songs = [];
+
 let currentIndex = -1;
 
 let shuffle = false;
+
 let repeat = false;
 
-let queue = [];
-
 let likedSongs =
-    new Set(
-        JSON.parse(
-            localStorage.getItem("likedSongs") || "[]"
-        )
-    );
-
-let playlists =
     JSON.parse(
-        localStorage.getItem("playlists") || "[]"
+        localStorage.getItem("vibemusic-liked") || "[]"
     );
 
 let recentlyPlayed =
     JSON.parse(
-        localStorage.getItem("recentlyPlayed") || "[]"
+        localStorage.getItem("vibemusic-recent") || "[]"
     );
 
+let playlists =
+    JSON.parse(
+        localStorage.getItem("vibemusic-playlists") || "{}"
+    );
 
-/* =========================
-   HELPERS
-========================= */
+let localSongs = [];
+
+let deferredInstallPrompt = null;
+
+
+/* =========================================================
+   INITIALIZATION
+========================================================= */
+
+document.addEventListener("DOMContentLoaded", async () => {
+
+    audio.volume = 0.8;
+
+    await loadSongs();
+
+    renderHome();
+
+    renderPlaylists();
+
+});
+
+
+/* =========================================================
+   LOAD SONG DATABASE
+========================================================= */
+
+async function loadSongs() {
+
+    try {
+
+        const response = await fetch("songs.json", {
+            cache: "no-cache"
+        });
+
+        if (!response.ok) {
+            throw new Error("songs.json could not be loaded");
+        }
+
+        const databaseSongs = await response.json();
+
+        if (Array.isArray(databaseSongs)) {
+
+            songs = databaseSongs.map((song, index) => ({
+
+                ...song,
+
+                id:
+                    song.id ??
+                    `song-${index + 1}`
+
+            }));
+
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+        songs = [];
+
+        showToast(
+            "Could not load songs.json"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   SONG HELPERS
+========================================================= */
+
+function getSongId(song) {
+
+    return String(song.id);
+
+}
+
+
+function getSongCover(song) {
+
+    return song.cover || "";
+
+}
+
+
+function isLiked(song) {
+
+    return likedSongs.includes(
+        getSongId(song)
+    );
+
+}
+
+
+/* =========================================================
+   PLAY SONG
+========================================================= */
+
+function playSong(index, autoPlay = true) {
+
+    if (!songs.length) {
+        showToast("No songs available");
+        return;
+    }
+
+    if (index < 0) {
+        index = songs.length - 1;
+    }
+
+    if (index >= songs.length) {
+        index = 0;
+    }
+
+    currentIndex = index;
+
+    const song = songs[currentIndex];
+
+    if (!song.audio) {
+
+        showToast(
+            "This song has no audio file"
+        );
+
+        return;
+
+    }
+
+
+    /* AUDIO SOURCE */
+
+    audio.src = song.audio;
+
+    audio.load();
+
+
+    /* PLAYER INFO */
+
+    playerTitle.textContent =
+        song.title || "Unknown Song";
+
+    playerArtist.textContent =
+        song.artist || "Unknown Artist";
+
+
+    /* COVER */
+
+    updatePlayerCover(song);
+
+
+    /* LIKE */
+
+    updateLikeButton();
+
+
+    /* RECENTLY PLAYED */
+
+    addRecentlyPlayed(song);
+
+
+    /* UPDATE SONG LIST */
+
+    updatePlayingRows();
+
+
+    /* PLAY */
+
+    if (autoPlay) {
+
+        audio.play()
+            .then(() => {
+
+                updatePlayButton();
+
+            })
+            .catch(error => {
+
+                console.log(
+                    "Playback waiting for user interaction:",
+                    error
+                );
+
+            });
+
+    }
+
+
+    renderCurrentPage();
+}
+
+
+/* =========================================================
+   COVER
+========================================================= */
+
+function updatePlayerCover(song) {
+
+    const cover = getSongCover(song);
+
+    if (cover) {
+
+        playerCover.innerHTML =
+            `<img src="${escapeHtml(cover)}" alt="">`;
+
+    } else {
+
+        playerCover.innerHTML =
+            `<span>♫</span>`;
+
+    }
+
+}
+
+
+/* =========================================================
+   PLAY / PAUSE
+========================================================= */
+
+function togglePlay() {
+
+    if (currentIndex === -1) {
+
+        if (songs.length) {
+
+            playSong(0, true);
+
+        } else {
+
+            showToast("No songs available");
+
+        }
+
+        return;
+
+    }
+
+
+    if (audio.paused) {
+
+        audio.play()
+            .catch(() => {});
+
+    } else {
+
+        audio.pause();
+
+    }
+
+}
+
+
+playButton.addEventListener(
+    "click",
+    togglePlay
+);
+
+
+audio.addEventListener(
+    "play",
+    updatePlayButton
+);
+
+audio.addEventListener(
+    "pause",
+    updatePlayButton
+);
+
+
+function updatePlayButton() {
+
+    playButton.textContent =
+        audio.paused ? "▶" : "Ⅱ";
+
+    playButton.title =
+        audio.paused ? "Play" : "Pause";
+
+}
+
+
+/* =========================================================
+   PREVIOUS
+========================================================= */
+
+previousButton.addEventListener(
+    "click",
+    () => {
+
+        if (!songs.length) return;
+
+        let index;
+
+        if (shuffle) {
+
+            index =
+                Math.floor(
+                    Math.random() * songs.length
+                );
+
+        } else {
+
+            index = currentIndex - 1;
+
+        }
+
+        playSong(index);
+
+    }
+);
+
+
+/* =========================================================
+   NEXT
+========================================================= */
+
+nextButton.addEventListener(
+    "click",
+    playNext
+);
+
+
+function playNext() {
+
+    if (!songs.length) return;
+
+    let nextIndex;
+
+    if (shuffle) {
+
+        if (songs.length === 1) {
+
+            nextIndex = 0;
+
+        } else {
+
+            do {
+
+                nextIndex =
+                    Math.floor(
+                        Math.random() *
+                        songs.length
+                    );
+
+            } while (
+                nextIndex === currentIndex
+            );
+
+        }
+
+    } else {
+
+        nextIndex =
+            currentIndex + 1;
+
+        if (nextIndex >= songs.length) {
+            nextIndex = 0;
+        }
+
+    }
+
+    playSong(nextIndex);
+
+}
+
+
+/* =========================================================
+   WHEN SONG ENDS
+========================================================= */
+
+audio.addEventListener(
+    "ended",
+    () => {
+
+        if (repeat === "one") {
+
+            audio.currentTime = 0;
+
+            audio.play();
+
+            return;
+
+        }
+
+        playNext();
+
+    }
+);
+
+
+/* =========================================================
+   SHUFFLE
+========================================================= */
+
+shuffleButton.addEventListener(
+    "click",
+    () => {
+
+        shuffle = !shuffle;
+
+        shuffleButton.classList.toggle(
+            "active",
+            shuffle
+        );
+
+        showToast(
+            shuffle
+                ? "Shuffle enabled"
+                : "Shuffle disabled"
+        );
+
+    }
+);
+
+
+/* =========================================================
+   REPEAT
+========================================================= */
+
+repeatButton.addEventListener(
+    "click",
+    () => {
+
+        if (repeat === false) {
+
+            repeat = true;
+
+            repeatButton.classList.add(
+                "active"
+            );
+
+            repeatButton.textContent = "🔁";
+
+            showToast("Repeat all enabled");
+
+        } else if (repeat === true) {
+
+            repeat = "one";
+
+            repeatButton.classList.add(
+                "active"
+            );
+
+            repeatButton.textContent = "🔂";
+
+            showToast("Repeat song enabled");
+
+        } else {
+
+            repeat = false;
+
+            repeatButton.classList.remove(
+                "active"
+            );
+
+            repeatButton.textContent = "🔁";
+
+            showToast("Repeat disabled");
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   PROGRESS BAR
+========================================================= */
+
+audio.addEventListener(
+    "loadedmetadata",
+    () => {
+
+        durationEl.textContent =
+            formatTime(audio.duration);
+
+        progressBar.max =
+            audio.duration || 100;
+
+    }
+);
+
+
+audio.addEventListener(
+    "timeupdate",
+    () => {
+
+        if (!audio.duration) return;
+
+        progressBar.value =
+            audio.currentTime;
+
+        currentTimeEl.textContent =
+            formatTime(audio.currentTime);
+
+    }
+);
+
+
+progressBar.addEventListener(
+    "input",
+    () => {
+
+        audio.currentTime =
+            Number(progressBar.value);
+
+    }
+);
+
+
+/* =========================================================
+   TIME FORMAT
+========================================================= */
 
 function formatTime(seconds) {
 
@@ -40,1379 +599,937 @@ function formatTime(seconds) {
         Math.floor(seconds / 60);
 
     const secs =
-        Math.floor(seconds % 60)
-            .toString()
-            .padStart(2, "0");
+        Math.floor(seconds % 60);
 
-    return `${minutes}:${secs}`;
+    return `${minutes}:${secs
+        .toString()
+        .padStart(2, "0")}`;
+
 }
 
 
-function saveData() {
+/* =========================================================
+   VOLUME
+========================================================= */
 
-    localStorage.setItem(
-        "likedSongs",
-        JSON.stringify([...likedSongs])
-    );
+volumeSlider.addEventListener(
+    "input",
+    () => {
 
-    localStorage.setItem(
-        "playlists",
-        JSON.stringify(playlists)
-    );
+        audio.volume =
+            Number(volumeSlider.value);
 
-    localStorage.setItem(
-        "recentlyPlayed",
-        JSON.stringify(recentlyPlayed)
-    );
-}
-
-
-function escapeHTML(text) {
-
-    return String(text)
-        .replace(/[&<>"']/g, char => ({
-            "&": "&amp;",
-            "<": "&lt;",
-            ">": "&gt;",
-            '"': "&quot;",
-            "'": "&#039;"
-        }[char]));
-}
-
-
-/* =========================
-   LOAD SONG DATABASE
-========================= */
-
-async function loadSongs() {
-
-    try {
-
-        const response =
-            await fetch("songs.json");
-
-        songs =
-            await response.json();
-
-        renderHome();
-
-        renderPlaylists();
-
-    } catch (error) {
-
-        console.error(error);
-
-        document.getElementById("content").innerHTML = `
-            <div class="section">
-                <h2>Unable to load songs</h2>
-                <p>
-                    Check that songs.json exists
-                    in your GitHub repository.
-                </p>
-            </div>
-        `;
-    }
-}
-
-
-/* =========================
-   SONG ART
-========================= */
-
-function albumArt(song, className = "album-art") {
-
-    if (song.cover) {
-
-        return `
-            <div class="${className}">
-                <img
-                    src="${song.cover}"
-                    style="width:100%;height:100%;object-fit:cover;border-radius:inherit;"
-                >
-            </div>
-        `;
+        updateVolumeIcon();
 
     }
+);
 
-    return `
-        <div class="${className}">
-            ♫
-        </div>
-    `;
-}
 
+muteButton.addEventListener(
+    "click",
+    () => {
 
-/* =========================
-   SONG CARD
-========================= */
+        audio.muted =
+            !audio.muted;
 
-function songCard(song) {
-
-    return `
-        <article class="song-card">
-
-            ${albumArt(song)}
-
-            <button
-                class="card-play"
-                data-play="${song.id}"
-            >
-                ▶
-            </button>
-
-            <div class="song-name">
-                ${escapeHTML(song.title)}
-            </div>
-
-            <div class="song-artist">
-                ${escapeHTML(song.artist)}
-            </div>
-
-        </article>
-    `;
-}
-
-
-/* =========================
-   SONG ROW
-========================= */
-
-function songRow(song) {
-
-    const isLiked =
-        likedSongs.has(song.id);
-
-    return `
-        <div class="song-row">
-
-            ${albumArt(song, "row-art")}
-
-            <div>
-
-                <div class="row-title">
-                    ${escapeHTML(song.title)}
-                </div>
-
-                <div class="row-artist">
-                    ${escapeHTML(song.artist)}
-                </div>
-
-            </div>
-
-            <button
-                class="row-button"
-                data-like="${song.id}"
-            >
-                ${isLiked ? "♥" : "♡"}
-            </button>
-
-            <button
-                class="row-button"
-                data-play="${song.id}"
-            >
-                ▶
-            </button>
-
-        </div>
-    `;
-}
-
-
-/* =========================
-   SONG LIST
-========================= */
-
-function songList(list) {
-
-    if (!list.length) {
-
-        return `
-            <div class="empty">
-                <h3>No songs found</h3>
-
-                <p>
-                    Add songs using the
-                    "Add Songs" button.
-                </p>
-            </div>
-        `;
-    }
-
-    return `
-        <div class="song-list">
-
-            ${list.map(songRow).join("")}
-
-        </div>
-    `;
-}
-
-
-/* =========================
-   HOME
-========================= */
-
-function renderHome() {
-
-    const recent =
-        recentlyPlayed
-            .map(id =>
-                songs.find(song => song.id == id)
-            )
-            .filter(Boolean)
-            .slice(0, 6);
-
-
-    document.getElementById("content").innerHTML = `
-
-        <section class="hero">
-
-            <div class="hero-content">
-
-                <small>
-                    YOUR PERSONAL MUSIC PLAYER
-                </small>
-
-                <h1>
-                    Music that feels like you.
-                </h1>
-
-                <p>
-                    Listen to your collection,
-                    shuffle your favorites,
-                    create playlists and
-                    add new songs whenever you want.
-                </p>
-
-                <button
-                    class="play-all"
-                    id="playAll"
-                >
-                    ▶ Play All
-                </button>
-
-                <button
-                    class="shuffle-all"
-                    id="shuffleAll"
-                >
-                    🔀 Shuffle
-                </button>
-
-            </div>
-
-        </section>
-
-
-        ${
-            recent.length
-            ?
-            `
-            <section class="section">
-
-                <div class="section-header">
-
-                    <h2>
-                        Recently Played
-                    </h2>
-
-                </div>
-
-                <div class="song-grid">
-
-                    ${recent.map(songCard).join("")}
-
-                </div>
-
-            </section>
-            `
-            :
-            ""
-        }
-
-
-        <section class="section">
-
-            <div class="section-header">
-
-                <h2>
-                    Your Music
-                </h2>
-
-                <span>
-                    ${songs.length} songs
-                </span>
-
-            </div>
-
-            ${songList(songs)}
-
-        </section>
-    `;
-
-
-    document.getElementById("playAll")
-        .onclick = () => {
-
-            playList(songs);
-
-        };
-
-
-    document.getElementById("shuffleAll")
-        .onclick = () => {
-
-            shuffle = true;
-
-            playRandom();
-
-        };
-}
-
-
-/* =========================
-   LIBRARY
-========================= */
-
-function renderLibrary() {
-
-    const search =
-        document.getElementById(
-            "searchInput"
-        ).value
-        .toLowerCase();
-
-
-    let results = songs;
-
-
-    if (search) {
-
-        results =
-            songs.filter(song => {
-
-                return (
-                    song.title
-                        .toLowerCase()
-                        .includes(search)
-
-                    ||
-
-                    song.artist
-                        .toLowerCase()
-                        .includes(search)
-
-                    ||
-
-                    (song.album || "")
-                        .toLowerCase()
-                        .includes(search)
-                );
-
-            });
+        updateVolumeIcon();
 
     }
+);
 
 
-    document.getElementById("content")
-        .innerHTML = `
+function updateVolumeIcon() {
 
-        <section class="section">
+    if (
+        audio.muted ||
+        audio.volume === 0
+    ) {
 
-            <div class="section-header">
+        muteButton.textContent = "🔇";
 
-                <h2>
-                    ${
-                        search
-                        ? "Search Results"
-                        : "Your Library"
-                    }
-                </h2>
+    } else if (audio.volume < 0.5) {
 
-                <span>
-                    ${results.length} songs
-                </span>
-
-            </div>
-
-            ${songList(results)}
-
-        </section>
-    `;
-}
-
-
-/* =========================
-   LIKED SONGS
-========================= */
-
-function renderLiked() {
-
-    const liked =
-        songs.filter(song =>
-            likedSongs.has(song.id)
-        );
-
-
-    document.getElementById("content")
-        .innerHTML = `
-
-        <section class="section">
-
-            <div class="section-header">
-
-                <h2>
-                    ❤️ Liked Songs
-                </h2>
-
-                <span>
-                    ${liked.length}
-                </span>
-
-            </div>
-
-            ${songList(liked)}
-
-        </section>
-    `;
-}
-
-
-/* =========================
-   PLAY SONG
-========================= */
-
-function playSong(id) {
-
-    const index =
-        songs.findIndex(
-            song => song.id == id
-        );
-
-
-    if (index === -1) return;
-
-
-    currentIndex = index;
-
-
-    const song =
-        songs[index];
-
-
-    if (!song.audio) {
-
-        showToast(
-            "This song doesn't have an audio URL yet."
-        );
-
-        return;
-    }
-
-
-    audio.src =
-        song.audio;
-
-
-    audio.play()
-        .catch(() => {
-
-            showToast(
-                "Press Play to start the song."
-            );
-
-        });
-
-
-    document.getElementById(
-        "playerTitle"
-    ).textContent =
-        song.title;
-
-
-    document.getElementById(
-        "playerArtist"
-    ).textContent =
-        song.artist;
-
-
-    document.getElementById(
-        "likeButton"
-    ).textContent =
-        likedSongs.has(song.id)
-        ? "♥"
-        : "♡";
-
-
-    const cover =
-        document.getElementById(
-            "playerCover"
-        );
-
-
-    if (song.cover) {
-
-        cover.innerHTML =
-            `<img src="${song.cover}"
-            style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">`;
+        muteButton.textContent = "🔉";
 
     } else {
 
-        cover.innerHTML = "♫";
+        muteButton.textContent = "🔊";
 
     }
-
-
-    recentlyPlayed =
-        [
-            song.id,
-            ...recentlyPlayed
-                .filter(id =>
-                    id !== song.id
-                )
-        ].slice(0, 20);
-
-
-    saveData();
 
 }
 
 
-/* =========================
-   PLAY LIST
-========================= */
+/* =========================================================
+   LIKE / FAVORITES
+========================================================= */
 
-function playList(list) {
+likeButton.addEventListener(
+    "click",
+    () => {
 
-    queue =
-        list.map(
-            song => song.id
-        );
+        if (currentIndex === -1) return;
 
+        const song =
+            songs[currentIndex];
 
-    if (!queue.length) return;
-
-
-    playSong(queue[0]);
-
-}
-
-
-/* =========================
-   RANDOM
-========================= */
-
-function playRandom() {
-
-    if (!songs.length) return;
-
-
-    queue =
-        songs.map(song => song.id);
-
-
-    const randomIndex =
-        Math.floor(
-            Math.random() * queue.length
-        );
-
-
-    playSong(
-        queue[randomIndex]
-    );
-}
-
-
-/* =========================
-   NEXT
-========================= */
-
-function nextSong() {
-
-    if (!songs.length) return;
-
-
-    if (repeat) {
-
-        audio.currentTime = 0;
-
-        audio.play();
-
-        return;
-    }
-
-
-    if (!queue.length) {
-
-        queue =
-            songs.map(song =>
-                song.id
-            );
-    }
-
-
-    let position =
-        queue.indexOf(
-            songs[currentIndex]?.id
-        );
-
-
-    if (shuffle) {
-
-        playRandom();
-
-        return;
-    }
-
-
-    position++;
-
-
-    if (
-        position >=
-        queue.length
-    ) {
-
-        position = 0;
+        toggleLike(song);
 
     }
+);
 
 
-    playSong(
-        queue[position]
-    );
-}
+function toggleLike(song) {
 
+    const id =
+        getSongId(song);
 
-/* =========================
-   PREVIOUS
-========================= */
+    if (likedSongs.includes(id)) {
 
-function previousSong() {
-
-    if (!queue.length) {
-
-        queue =
-            songs.map(song =>
-                song.id
+        likedSongs =
+            likedSongs.filter(
+                x => x !== id
             );
 
-    }
-
-
-    let position =
-        queue.indexOf(
-            songs[currentIndex]?.id
+        showToast(
+            "Removed from favorites"
         );
 
+    } else {
 
-    position--;
+        likedSongs.push(id);
 
-
-    if (position < 0) {
-
-        position =
-            queue.length - 1;
+        showToast(
+            "Added to favorites ❤️"
+        );
 
     }
 
-
-    playSong(
-        queue[position]
+    localStorage.setItem(
+        "vibemusic-liked",
+        JSON.stringify(likedSongs)
     );
+
+    updateLikeButton();
+
+    renderCurrentPage();
+
 }
 
 
-/* =========================
-   CONTROLS
-========================= */
-
-document.getElementById(
-    "playButton"
-).onclick = () => {
+function updateLikeButton() {
 
     if (currentIndex === -1) {
 
-        playList(songs);
+        likeButton.textContent = "♡";
+
+        likeButton.classList.remove(
+            "liked"
+        );
 
         return;
 
     }
 
+    const song =
+        songs[currentIndex];
 
-    if (audio.paused) {
+    const liked =
+        isLiked(song);
 
-        audio.play();
+    likeButton.textContent =
+        liked ? "♥" : "♡";
 
-    } else {
-
-        audio.pause();
-
-    }
-
-};
-
-
-document.getElementById(
-    "nextButton"
-).onclick =
-    nextSong;
-
-
-document.getElementById(
-    "previousButton"
-).onclick =
-    previousSong;
-
-
-document.getElementById(
-    "shuffleButton"
-).onclick = () => {
-
-    shuffle = !shuffle;
-
-    showToast(
-        shuffle
-        ? "Shuffle enabled"
-        : "Shuffle disabled"
+    likeButton.classList.toggle(
+        "liked",
+        liked
     );
 
-};
+}
 
 
-document.getElementById(
-    "repeatButton"
-).onclick = () => {
+/* =========================================================
+   RECENTLY PLAYED
+========================================================= */
 
-    repeat = !repeat;
-
-    showToast(
-        repeat
-        ? "Repeat enabled"
-        : "Repeat disabled"
-    );
-
-};
-
-
-document.getElementById(
-    "likeButton"
-).onclick = () => {
-
-    if (currentIndex === -1)
-        return;
-
+function addRecentlyPlayed(song) {
 
     const id =
-        songs[currentIndex].id;
-
-
-    if (likedSongs.has(id)) {
-
-        likedSongs.delete(id);
-
-    } else {
-
-        likedSongs.add(id);
-
-    }
-
-
-    saveData();
-
-
-    document.getElementById(
-        "likeButton"
-    ).textContent =
-        likedSongs.has(id)
-        ? "♥"
-        : "♡";
-
-};
-
-
-/* =========================
-   AUDIO EVENTS
-========================= */
-
-audio.addEventListener(
-    "play",
-    () => {
-
-        document.getElementById(
-            "playButton"
-        ).textContent = "❚❚";
-
-    }
-);
-
-
-audio.addEventListener(
-    "pause",
-    () => {
-
-        document.getElementById(
-            "playButton"
-        ).textContent = "▶";
-
-    }
-);
-
-
-audio.addEventListener(
-    "ended",
-    nextSong
-);
-
-
-audio.addEventListener(
-    "loadedmetadata",
-    () => {
-
-        document.getElementById(
-            "duration"
-        ).textContent =
-            formatTime(
-                audio.duration
-            );
-
-    }
-);
-
-
-audio.addEventListener(
-    "timeupdate",
-    () => {
-
-        if (!audio.duration)
-            return;
-
-
-        const percentage =
-            (
-                audio.currentTime /
-                audio.duration
-            ) * 100;
-
-
-        document.getElementById(
-            "progressBar"
-        ).value =
-            percentage;
-
-
-        document.getElementById(
-            "currentTime"
-        ).textContent =
-            formatTime(
-                audio.currentTime
-            );
-
-    }
-);
-
-
-/* =========================
-   PROGRESS
-========================= */
-
-document.getElementById(
-    "progressBar"
-).oninput = event => {
-
-    if (!audio.duration)
-        return;
-
-
-    audio.currentTime =
-        (
-            event.target.value /
-            100
-        ) *
-        audio.duration;
-
-};
-
-
-/* =========================
-   VOLUME
-========================= */
-
-audio.volume = 0.8;
-
-
-document.getElementById(
-    "volumeSlider"
-).oninput = event => {
-
-    audio.volume =
-        event.target.value;
-
-};
-
-
-document.getElementById(
-    "muteButton"
-).onclick = () => {
-
-    audio.muted =
-        !audio.muted;
-
-
-    document.getElementById(
-        "muteButton"
-    ).textContent =
-        audio.muted
-        ? "🔇"
-        : "🔊";
-
-};
-
-
-/* =========================
-   SEARCH
-========================= */
-
-document.getElementById(
-    "searchInput"
-).addEventListener(
-    "input",
-    renderLibrary
-);
-
-
-document.getElementById(
-    "clearSearch"
-).onclick = () => {
-
-    document.getElementById(
-        "searchInput"
-    ).value = "";
-
-    renderLibrary();
-
-};
-
-
-/* =========================
-   NAVIGATION
-========================= */
-
-document.querySelectorAll(
-    ".nav-btn"
-).forEach(button => {
-
-    button.onclick = () => {
-
-        document.querySelectorAll(
-            ".nav-btn"
-        ).forEach(btn =>
-            btn.classList.remove(
-                "active"
-            )
+        getSongId(song);
+
+    recentlyPlayed =
+        recentlyPlayed.filter(
+            item => item !== id
         );
 
-
-        button.classList.add(
-            "active"
-        );
-
-
-        const page =
-            button.dataset.page;
-
-
-        if (page === "home")
-            renderHome();
-
-        if (page === "library")
-            renderLibrary();
-
-        if (page === "liked")
-            renderLiked();
-
-    };
-
-});
-
-
-/* =========================
-   CLICK SONG
-========================= */
-
-document.getElementById(
-    "content"
-).addEventListener(
-    "click",
-    event => {
-
-        const playButton =
-            event.target.closest(
-                "[data-play]"
-            );
-
-
-        if (playButton) {
-
-            playSong(
-                playButton.dataset.play
-            );
-
-        }
-
-
-        const likeButton =
-            event.target.closest(
-                "[data-like]"
-            );
-
-
-        if (likeButton) {
-
-            const id =
-                Number(
-                    likeButton.dataset.like
-                );
-
-
-            if (likedSongs.has(id)) {
-
-                likedSongs.delete(id);
-
-            } else {
-
-                likedSongs.add(id);
-
-            }
-
-
-            saveData();
-
-            renderLibrary();
-
-        }
-
-    }
-);
-
-
-/* =========================
-   ADD LOCAL SONGS
-========================= */
-
-document.getElementById(
-    "addSongButton"
-).onclick = () => {
-
-    document.getElementById(
-        "addSongDialog"
-    ).showModal();
-
-};
-
-
-document.getElementById(
-    "songFiles"
-).onchange = event => {
-
-    const files =
-        [...event.target.files];
-
-
-    document.getElementById(
-        "selectedFiles"
-    ).innerHTML =
-        files.map(file => `
-            <div class="selected-file">
-                🎵 ${escapeHTML(file.name)}
-            </div>
-        `).join("");
-
-
-    document.getElementById(
-        "saveSongs"
-    ).disabled =
-        files.length === 0;
-
-};
-
-
-document.getElementById(
-    "addSongForm"
-).onsubmit = event => {
-
-    if (
-        event.submitter?.value !==
-        "default"
-    ) return;
-
-
-    event.preventDefault();
-
-
-    const files =
-        [
-            ...document.getElementById(
-                "songFiles"
-            ).files
-        ];
-
-
-    files.forEach(file => {
-
-        const newSong = {
-
-            id:
-                Date.now() +
-                Math.random(),
-
-            title:
-                file.name
-                    .replace(
-                        /\.[^/.]+$/,
-                        ""
-                    )
-                    .replace(
-                        /[_-]/g,
-                        " "
-                    ),
-
-            artist:
-                "Local Song",
-
-            album:
-                "My Library",
-
-            audio:
-                URL.createObjectURL(
-                    file
-                ),
-
-            cover: ""
-
-        };
-
-
-        songs.push(
-            newSong
-        );
-
-    });
-
-
-    document.getElementById(
-        "addSongDialog"
-    ).close();
-
-
-    document.getElementById(
-        "songFiles"
-    ).value = "";
-
-
-    renderHome();
-
-
-    showToast(
-        `${files.length} song(s) added`
+    recentlyPlayed.unshift(id);
+
+    recentlyPlayed =
+        recentlyPlayed.slice(0, 30);
+
+    localStorage.setItem(
+        "vibemusic-recent",
+        JSON.stringify(
+            recentlyPlayed
+        )
     );
 
-};
+}
 
 
-/* =========================
-   PLAYLISTS
-========================= */
+/* =========================================================
+   RENDER HOME
+========================================================= */
 
-document.getElementById(
-    "createPlaylist"
-).onclick = () => {
+function renderHome() {
 
-    document.getElementById(
-        "playlistDialog"
-    ).showModal();
+    const search =
+        searchInput.value
+            .trim()
+            .toLowerCase();
 
-};
+    let filtered =
+        songs.filter(song => {
 
+            const title =
+                String(song.title || "")
+                    .toLowerCase();
 
-document.getElementById(
-    "playlistForm"
-).onsubmit = event => {
+            const artist =
+                String(song.artist || "")
+                    .toLowerCase();
 
-    if (
-        event.submitter?.value !==
-        "default"
-    ) return;
+            return (
+                title.includes(search) ||
+                artist.includes(search)
+            );
 
-
-    event.preventDefault();
-
-
-    const name =
-        document.getElementById(
-            "playlistName"
-        ).value.trim();
+        });
 
 
-    if (!name) return;
+    content.innerHTML = `
+
+        <div class="page-header">
+
+            <h1>
+                ${search
+                    ? "Search Results"
+                    : "Your Music"}
+            </h1>
+
+            <p>
+                ${search
+                    ? `${filtered.length} songs found`
+                    : "Tap any song to start listening"}
+            </p>
+
+        </div>
+
+        <div class="song-list">
+
+            ${
+                filtered.length
+                ? filtered
+                    .map(song =>
+                        songRow(song)
+                    )
+                    .join("")
+                : emptyState(
+                    search
+                        ? "No songs found"
+                        : "No music yet"
+                )
+            }
+
+        </div>
+    `;
+
+    attachSongEvents();
+
+}
 
 
-    playlists.push({
+/* =========================================================
+   SONG ROW
+========================================================= */
 
-        id: Date.now(),
+function songRow(song) {
 
-        name: name,
-
-        songIds: []
-
-    });
-
-
-    saveData();
-
-    renderPlaylists();
-
-
-    document.getElementById(
-        "playlistDialog"
-    ).close();
-
-
-    document.getElementById(
-        "playlistName"
-    ).value = "";
-
-};
-
-
-/* =========================
-   PLAYLIST DISPLAY
-========================= */
-
-function renderPlaylists() {
-
-    const container =
-        document.getElementById(
-            "playlistList"
+    const originalIndex =
+        songs.findIndex(
+            s =>
+                getSongId(s) ===
+                getSongId(song)
         );
 
+    const liked =
+        isLiked(song);
 
-    container.innerHTML =
-        playlists.map(
-            playlist => `
+    const cover =
+        getSongCover(song);
 
-                <button
-                    class="playlist-item"
-                    data-playlist="${playlist.id}"
-                >
-                    ♫ ${escapeHTML(
-                        playlist.name
-                    )}
-                </button>
-
-            `
-        ).join("");
+    const isPlaying =
+        originalIndex === currentIndex;
 
 
-    container
-        .querySelectorAll(
-            "[data-playlist]"
-        )
+    return `
+
+        <div
+            class="song-row ${isPlaying ? "playing" : ""}"
+            data-index="${originalIndex}">
+
+            <div class="song-cover">
+
+                ${
+                    cover
+                    ? `<img
+                        src="${escapeHtml(cover)}"
+                        alt=""
+                        class="song-cover">`
+                    : "♫"
+                }
+
+            </div>
+
+
+            <div class="song-info">
+
+                <div class="song-title">
+                    ${
+                        escapeHtml(
+                            song.title ||
+                            "Unknown Song"
+                        )
+                    }
+                </div>
+
+                <div class="song-artist">
+                    ${
+                        escapeHtml(
+                            song.artist ||
+                            "Unknown Artist"
+                        )
+                    }
+                </div>
+
+            </div>
+
+
+            <span class="song-duration">
+                ${song.duration || ""}
+            </span>
+
+
+            <button
+                class="song-like ${liked ? "liked" : ""}"
+                data-like="${escapeHtml(getSongId(song))}"
+                title="Favorite">
+
+                ${liked ? "♥" : "♡"}
+
+            </button>
+
+        </div>
+    `;
+
+}
+
+
+/* =========================================================
+   ATTACH SONG EVENTS
+========================================================= */
+
+function attachSongEvents() {
+
+    document
+        .querySelectorAll(".song-row")
+        .forEach(row => {
+
+            row.addEventListener(
+                "click",
+                event => {
+
+                    if (
+                        event.target.closest(
+                            ".song-like"
+                        )
+                    ) {
+                        return;
+                    }
+
+                    const index =
+                        Number(
+                            row.dataset.index
+                        );
+
+                    /*
+                       IMPORTANT:
+                       Clicking/touching the
+                       song itself immediately
+                       starts playback.
+                    */
+
+                    playSong(index, true);
+
+                }
+            );
+
+        });
+
+
+    document
+        .querySelectorAll(".song-like")
         .forEach(button => {
 
-            button.onclick = () => {
+            button.addEventListener(
+                "click",
+                event => {
 
-                const playlist =
-                    playlists.find(
-                        p =>
-                            p.id ==
-                            button.dataset.playlist
-                    );
+                    event.stopPropagation();
 
+                    const id =
+                        button.dataset.like;
 
-                if (!playlist)
-                    return;
+                    const song =
+                        songs.find(
+                            s =>
+                                getSongId(s) === id
+                        );
 
+                    if (song) {
+                        toggleLike(song);
+                    }
 
-                const list =
-                    playlist.songIds
-                        .map(id =>
-                            songs.find(
-                                song =>
-                                    song.id ==
-                                    id
-                            )
-                        )
-                        .filter(Boolean);
-
-
-                document.getElementById(
-                    "content"
-                ).innerHTML = `
-
-                    <section class="section">
-
-                        <div class="section-header">
-
-                            <h2>
-                                ♫ ${
-                                    escapeHTML(
-                                        playlist.name
-                                    )
-                                }
-                            </h2>
-
-                        </div>
-
-                        ${songList(list)}
-
-                    </section>
-                `;
-
-            };
+                }
+            );
 
         });
 
 }
 
 
-/* =========================
-   TOAST
-========================= */
+/* =========================================================
+   RECENTLY PLAYED PAGE
+========================================================= */
 
-function showToast(message) {
+function renderRecentlyPlayed() {
 
-    const toast =
-        document.getElementById(
-            "toast"
-        );
-
-
-    toast.textContent =
-        message;
-
-
-    toast.classList.add(
-        "show"
-    );
+    const recentSongs =
+        recentlyPlayed
+            .map(id =>
+                songs.find(
+                    song =>
+                        getSongId(song) ===
+                        String(id)
+                )
+            )
+            .filter(Boolean);
 
 
-    setTimeout(() => {
+    content.innerHTML = `
 
-        toast.classList.remove(
-            "show"
-        );
+        <div class="page-header">
 
-    }, 2500);
+            <h1>
+                Recently Played
+            </h1>
+
+            <p>
+                Your listening history
+            </p>
+
+        </div>
+
+        <div class="song-list">
+
+            ${
+                recentSongs.length
+                ? recentSongs
+                    .map(song =>
+                        songRow(song)
+                    )
+                    .join("")
+                : emptyState(
+                    "Nothing played recently"
+                )
+            }
+
+        </div>
+    `;
+
+    attachSongEvents();
 
 }
 
 
-/* =========================
-   PWA
-========================= */
+/* =========================================================
+   FAVORITES PAGE
+========================================================= */
 
-let deferredPrompt;
+function renderLiked() {
 
+    const favoriteSongs =
+        songs.filter(
+            song =>
+                isLiked(song)
+        );
+
+
+    content.innerHTML = `
+
+        <div class="page-header">
+
+            <h1>
+                Favorites ❤️
+            </h1>
+
+            <p>
+                Songs you've saved
+            </p>
+
+        </div>
+
+        <div class="song-list">
+
+            ${
+                favoriteSongs.length
+                ? favoriteSongs
+                    .map(song =>
+                        songRow(song)
+                    )
+                    .join("")
+                : emptyState(
+                    "No favorite songs yet"
+                )
+            }
+
+        </div>
+    `;
+
+    attachSongEvents();
+
+}
+
+
+/* =========================================================
+   LIBRARY
+========================================================= */
+
+function renderLibrary() {
+
+    content.innerHTML = `
+
+        <div class="page-header">
+
+            <h1>
+                Your Library
+            </h1>
+
+            <p>
+                All your music
+            </p>
+
+        </div>
+
+        <div class="song-list">
+
+            ${
+                songs.length
+                ? songs
+                    .map(song =>
+                        songRow(song)
+                    )
+                    .join("")
+                : emptyState(
+                    "Your library is empty"
+                )
+            }
+
+        </div>
+    `;
+
+    attachSongEvents();
+
+}
+
+
+/* =========================================================
+   CURRENT PAGE
+========================================================= */
+
+let currentPage = "home";
+
+
+function renderCurrentPage() {
+
+    if (currentPage === "home") {
+        renderHome();
+
+    } else if (currentPage === "library") {
+        renderLibrary();
+
+    } else if (currentPage === "liked") {
+        renderLiked();
+
+    } else if (currentPage === "recent") {
+        renderRecentlyPlayed();
+    }
+
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+document
+    .querySelectorAll(".nav-btn")
+    .forEach(button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                currentPage =
+                    button.dataset.page;
+
+                document
+                    .querySelectorAll(
+                        ".nav-btn"
+                    )
+                    .forEach(btn =>
+                        btn.classList.remove(
+                            "active"
+                        )
+                    );
+
+                button.classList.add(
+                    "active"
+                );
+
+                renderCurrentPage();
+
+            }
+        );
+
+    });
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+searchInput.addEventListener(
+    "input",
+    renderHome
+);
+
+
+clearSearch.addEventListener(
+    "click",
+    () => {
+
+        searchInput.value = "";
+
+        renderHome();
+
+        searchInput.focus();
+
+    }
+);
+
+
+/* =========================================================
+   LOCAL ADD SONGS
+========================================================= */
+
+addSongButton.addEventListener(
+    "click",
+    () => {
+
+        addSongDialog.showModal();
+
+    }
+);
+
+
+songFiles.addEventListener(
+    "change",
+    () => {
+
+        const files =
+            Array.from(
+                songFiles.files
+            );
+
+        selectedFiles.innerHTML =
+            files
+                .map(
+                    file =>
+                        `<div>
+                            🎵 ${escapeHtml(file.name)}
+                        </div>`
+                )
+                .join("");
+
+        saveSongs.disabled =
+            files.length === 0;
+
+    }
+);
+
+
+saveSongs.addEventListener(
+    "click",
+    event => {
+
+        event.preventDefault();
+
+        const files =
+            Array.from(
+                songFiles.files
+            );
+
+        files.forEach(file => {
+
+            const localSong = {
+
+                id:
+                    `local-${Date.now()}-${Math.random()}`,
+
+                title:
+                    file.name
+                        .replace(
+                            /\.[^/.]+$/,
+                            ""
+                        ),
+
+                artist:
+                    "Local Song",
+
+                audio:
+                    URL.createObjectURL(
+                        file
+                    ),
+
+                local: true
+
+            };
+
+            songs.push(localSong);
+
+        });
+
+
+        songFiles.value = "";
+
+        selectedFiles.innerHTML = "";
+
+        saveSongs.disabled = true;
+
+        addSongDialog.close();
+
+        renderCurrentPage();
+
+        showToast(
+            `${files.length} song(s) added`
+        );
+
+    }
+);
+
+
+/* =========================================================
+   PLAYLISTS
+========================================================= */
+
+createPlaylist.addEventListener(
+    "click",
+    () => {
+
+        playlistName.value = "";
+
+        playlistDialog.showModal();
+
+    }
+);
+
+
+playlistForm.addEventListener(
+    "submit",
+    event => {
+
+        event.preventDefault();
+
+        const name =
+            playlistName.value.trim();
+
+        if (!name) return;
+
+        playlists[name] =
+            playlists[name] || [];
+
+        localStorage.setItem(
+            "vibemusic-playlists",
+            JSON.stringify(
+                playlists
+            )
+        );
+
+        playlistDialog.close();
+
+        renderPlaylists();
+
+        showToast(
+            `Playlist "${name}" created`
+        );
+
+    }
+);
+
+
+function renderPlaylists() {
+
+    playlistList.innerHTML =
+        Object.keys(playlists)
+            .map(
+                name =>
+                    `<button
+                        class="playlist-item"
+                        data-playlist="${escapeHtml(name)}">
+                        ♫ ${escapeHtml(name)}
+                    </button>`
+            )
+            .join("");
+
+}
+
+
+/* =========================================================
+   PLAYING ROWS
+========================================================= */
+
+function updatePlayingRows() {
+
+    document
+        .querySelectorAll(".song-row")
+        .forEach(row => {
+
+            const index =
+                Number(
+                    row.dataset.index
+                );
+
+            row.classList.toggle(
+                "playing",
+                index === currentIndex
+            );
+
+        });
+
+}
+
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+function emptyState(message) {
+
+    return `
+
+        <div style="
+            text-align:center;
+            padding:70px 20px;
+            color:#77727e;
+        ">
+
+            <div style="
+                font-size:45px;
+                margin-bottom:15px;
+            ">
+                ♫
+            </div>
+
+            <h3 style="
+                color:white;
+                margin-bottom:8px;
+            ">
+                ${escapeHtml(message)}
+            </h3>
+
+            <p>
+                Select a song to start listening.
+            </p>
+
+        </div>
+
+    `;
+
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+let toastTimer;
+
+function showToast(message) {
+
+    toast.textContent = message;
+
+    toast.classList.add("show");
+
+    clearTimeout(toastTimer);
+
+    toastTimer =
+        setTimeout(
+            () => {
+                toast.classList.remove(
+                    "show"
+                );
+            },
+            2200
+        );
+
+}
+
+
+/* =========================================================
+   SECURITY HELPER
+========================================================= */
+
+function escapeHtml(value) {
+
+    return String(value)
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+/* =========================================================
+   PWA INSTALL
+========================================================= */
 
 window.addEventListener(
     "beforeinstallprompt",
@@ -1420,13 +1537,15 @@ window.addEventListener(
 
         event.preventDefault();
 
-        deferredPrompt =
+        deferredInstallPrompt =
             event;
 
+        const installButton =
+            document.getElementById(
+                "installButton"
+            );
 
-        document.getElementById(
-            "installButton"
-        ).classList.remove(
+        installButton.classList.remove(
             "hidden"
         );
 
@@ -1434,23 +1553,509 @@ window.addEventListener(
 );
 
 
-document.getElementById(
-    "installButton"
-).onclick = async () => {
+document
+    .getElementById("installButton")
+    ?.addEventListener(
+        "click",
+        async () => {
 
-    if (!deferredPrompt)
+            if (!deferredInstallPrompt) {
+                return;
+            }
+
+            deferredInstallPrompt.prompt();
+
+            await deferredInstallPrompt.userChoice;
+
+            deferredInstallPrompt = null;
+
+        }
+    );
+    /* =========================================================
+   ADVANCED PLAYLIST SYSTEM
+========================================================= */
+
+let selectedPlaylistSongs = [];
+
+
+/* ---------------------------------------------------------
+   OPEN PLAYLIST CREATOR
+--------------------------------------------------------- */
+
+createPlaylist.addEventListener(
+    "click",
+    () => {
+
+        playlistName.value = "";
+
+        selectedPlaylistSongs = [];
+
+        renderPlaylistSongSelector();
+
+        playlistDialog.showModal();
+
+    }
+);
+
+
+/* ---------------------------------------------------------
+   CLOSE BUTTONS
+--------------------------------------------------------- */
+
+document
+    .getElementById("closePlaylistDialog")
+    .addEventListener(
+        "click",
+        () => {
+
+            playlistDialog.close();
+
+        }
+    );
+
+
+document
+    .getElementById("cancelPlaylist")
+    .addEventListener(
+        "click",
+        () => {
+
+            playlistDialog.close();
+
+        }
+    );
+
+
+/* ---------------------------------------------------------
+   SONG SELECTOR
+--------------------------------------------------------- */
+
+function renderPlaylistSongSelector() {
+
+    const selector =
+        document.getElementById(
+            "playlistSongSelector"
+        );
+
+    const count =
+        document.getElementById(
+            "selectedSongCount"
+        );
+
+
+    count.textContent =
+        `${selectedPlaylistSongs.length} selected`;
+
+
+    if (!songs.length) {
+
+        selector.innerHTML = `
+
+            <div style="
+                padding:30px;
+                text-align:center;
+                color:#77727e;
+            ">
+
+                No songs available.
+
+            </div>
+
+        `;
+
         return;
 
+    }
 
-    deferredPrompt.prompt();
 
-    deferredPrompt = null;
+    selector.innerHTML =
+        songs
+            .map(song => {
+
+                const id =
+                    getSongId(song);
+
+                const selected =
+                    selectedPlaylistSongs
+                        .includes(id);
+
+                const cover =
+                    getSongCover(song);
+
+
+                return `
+
+                    <label
+                        class="
+                            playlist-select-song
+                            ${selected ? "selected" : ""}
+                        "
+                        data-id="${escapeHtml(id)}">
+
+                        <input
+                            type="checkbox"
+                            class="playlist-check"
+                            value="${escapeHtml(id)}"
+                            ${selected ? "checked" : ""}>
+
+                        <div class="playlist-mini-cover">
+
+                            ${
+                                cover
+                                ? `
+                                    <img
+                                        src="${escapeHtml(cover)}"
+                                        alt="">
+                                `
+                                : "♫"
+                            }
+
+                        </div>
+
+
+                        <div class="playlist-select-info">
+
+                            <strong>
+                                ${escapeHtml(
+                                    song.title ||
+                                    "Unknown Song"
+                                )}
+                            </strong>
+
+                            <span>
+                                ${escapeHtml(
+                                    song.artist ||
+                                    "Unknown Artist"
+                                )}
+                            </span>
+
+                        </div>
+
+                    </label>
+
+                `;
+
+            })
+            .join("");
+
+
+    selector
+        .querySelectorAll(
+            ".playlist-check"
+        )
+        .forEach(checkbox => {
+
+            checkbox.addEventListener(
+                "change",
+                () => {
+
+                    const id =
+                        checkbox.value;
+
+
+                    if (checkbox.checked) {
+
+                        if (
+                            !selectedPlaylistSongs
+                                .includes(id)
+                        ) {
+
+                            selectedPlaylistSongs
+                                .push(id);
+
+                        }
+
+                    } else {
+
+                        selectedPlaylistSongs =
+                            selectedPlaylistSongs
+                                .filter(
+                                    item =>
+                                        item !== id
+                                );
+
+                    }
+
+
+                    checkbox
+                        .closest(
+                            ".playlist-select-song"
+                        )
+                        .classList.toggle(
+                            "selected",
+                            checkbox.checked
+                        );
+
+
+                    document
+                        .getElementById(
+                            "selectedSongCount"
+                        )
+                        .textContent =
+                        `${selectedPlaylistSongs.length} selected`;
+
+                }
+            );
+
+        });
+
+}
+
+
+/* ---------------------------------------------------------
+   CREATE PLAYLIST
+--------------------------------------------------------- */
+
+playlistForm.addEventListener(
+    "submit",
+    event => {
+
+        event.preventDefault();
+
+
+        const name =
+            playlistName.value.trim();
+
+
+        if (!name) {
+
+            showToast(
+                "Enter a playlist name"
+            );
+
+            return;
+
+        }
+
+
+        if (
+            selectedPlaylistSongs.length === 0
+        ) {
+
+            showToast(
+                "Select at least one song"
+            );
+
+            return;
+
+        }
+
+
+        /* SAVE PLAYLIST */
+
+        playlists[name] = {
+
+            songs:
+                [...selectedPlaylistSongs],
+
+            created:
+                Date.now()
+
+        };
+
+
+        localStorage.setItem(
+            "vibemusic-playlists",
+            JSON.stringify(
+                playlists
+            )
+        );
+
+
+        playlistDialog.close();
+
+
+        renderPlaylists();
+
+
+        showToast(
+            `"${name}" playlist created 🎵`
+        );
+
+    }
+);
+
+
+/* =========================================================
+   RENDER PLAYLISTS
+========================================================= */
+
+function renderPlaylists() {
+
+    playlistList.innerHTML = "";
+
+
+    const names =
+        Object.keys(playlists);
+
+
+    names.forEach(name => {
+
+        const button =
+            document.createElement(
+                "button"
+            );
+
+
+        button.className =
+            "playlist-item";
+
+
+        button.innerHTML = `
+            <span>♫</span>
+            <span>${escapeHtml(name)}</span>
+        `;
+
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                renderPlaylistPage(name);
+
+            }
+        );
+
+
+        playlistList.appendChild(
+            button
+        );
+
+    });
+
+}
+
+
+/* =========================================================
+   PLAYLIST PAGE
+========================================================= */
+
+function renderPlaylistPage(name) {
+
+    currentPage =
+        "playlist";
+
+
+    const playlist =
+        playlists[name];
+
+
+    if (!playlist) {
+
+        showToast(
+            "Playlist not found"
+        );
+
+        return;
+
+    }
+
+
+    /*
+       Old playlists may have been stored
+       as simple arrays.
+    */
+
+    const playlistSongIds =
+        Array.isArray(playlist)
+        ? playlist
+        : playlist.songs || [];
+
+
+    const playlistSongs =
+        playlistSongIds
+            .map(id =>
+                songs.find(
+                    song =>
+                        getSongId(song) ===
+                        String(id)
+                )
+            )
+            .filter(Boolean);
+
+
+    content.innerHTML = `
+
+        <div class="playlist-page-header">
+
+            <div class="playlist-page-icon">
+                ♫
+            </div>
+
+            <div>
+
+                <h1>
+                    ${escapeHtml(name)}
+                </h1>
+
+                <p>
+                    ${playlistSongs.length}
+                    ${
+                        playlistSongs.length === 1
+                        ? "song"
+                        : "songs"
+                    }
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="song-list">
+
+            ${
+                playlistSongs.length
+                ? playlistSongs
+                    .map(
+                        song =>
+                            songRow(song)
+                    )
+                    .join("")
+                : emptyState(
+                    "This playlist is empty"
+                )
+            }
+
+        </div>
+
+    `;
+
+
+    attachSongEvents();
+
+}
+
+
+/* =========================================================
+   UPDATE CURRENT PAGE
+========================================================= */
+
+const oldRenderCurrentPage =
+    renderCurrentPage;
+
+
+/*
+   We need playlist pages to survive
+   normal player updates.
+*/
+
+renderCurrentPage = function () {
+
+    if (
+        currentPage === "playlist"
+    ) {
+
+        /*
+           Don't recreate playlist
+           unnecessarily.
+        */
+
+        return;
+
+    }
+
+
+    oldRenderCurrentPage();
 
 };
-
-
-/* =========================
-   START
-========================= */
-
-loadSongs();
