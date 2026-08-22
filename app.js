@@ -194,7 +194,7 @@ const MUSIC_BASE_URL =
     "https://abishekinstinct.github.io/Music-Fall/";
 
 const SONG_JSON_URL =
-    MUSIC_BASE_URL + "song.json";
+    MUSIC_BASE_URL + "songs.json";
 
 
 function makeAbsoluteAudioURL(path) {
