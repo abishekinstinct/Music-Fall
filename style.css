@@ -2503,3 +2503,2087 @@ dialog h2 {
     }
 
 }
+/* =========================================================
+   VIBEMUSIC - FINAL RESPONSIVE SYSTEM
+   Mobile + Tablet + Desktop
+   Added as final overrides
+   ========================================================= */
+
+/* ---------- GLOBAL RESPONSIVE SAFETY ---------- */
+
+html {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+}
+
+img,
+video {
+    max-width: 100%;
+}
+
+button,
+input {
+    touch-action: manipulation;
+}
+
+.main,
+#content,
+.music-section,
+.song-list {
+    min-width: 0;
+}
+
+
+/* =========================================================
+   LARGE DESKTOP
+   ========================================================= */
+
+@media (min-width: 1200px) {
+
+    .main {
+        padding-left: 40px;
+        padding-right: 40px;
+    }
+
+    .song-row {
+        min-height: 72px;
+    }
+
+    .music-player {
+        padding-left: 30px;
+        padding-right: 30px;
+    }
+}
+
+
+/* =========================================================
+   TABLET / SMALL LAPTOP
+   701px - 1199px
+   ========================================================= */
+
+@media (min-width: 701px) and (max-width: 1199px) {
+
+    .sidebar {
+        width: 220px;
+    }
+
+    .main {
+        margin-left: 220px;
+        width: calc(100% - 220px);
+        padding: 20px;
+    }
+
+    .topbar {
+        gap: 12px;
+    }
+
+    .add-song-btn {
+        padding-left: 15px;
+        padding-right: 15px;
+        white-space: nowrap;
+    }
+
+    .music-player {
+        grid-template-columns:
+            minmax(180px, 1fr)
+            minmax(280px, 1.5fr)
+            minmax(130px, .7fr);
+
+        gap: 15px;
+        padding: 10px 18px;
+    }
+
+    .volume-control input {
+        width: 75px;
+    }
+
+    .song-row {
+        grid-template-columns:
+            35px
+            52px
+            minmax(0, 1fr)
+            70px
+            38px
+            40px;
+
+        gap: 10px;
+    }
+
+    .song-cover {
+        width: 52px;
+        height: 52px;
+    }
+
+    .song-playing-label {
+        font-size: 8px;
+    }
+
+    .playlist-art {
+        width: 125px;
+        height: 125px;
+        font-size: 50px;
+    }
+}
+
+
+/* =========================================================
+   MOBILE
+   700px AND BELOW
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    :root {
+        --mobile-nav-height: 64px;
+        --mobile-player-height: 128px;
+    }
+
+
+    /* ---------- MAIN APP ---------- */
+
+    .app {
+        display: block;
+        min-height: 100dvh;
+
+        /*
+         * Space for:
+         * music player + bottom navigation
+         */
+        padding-bottom:
+            calc(
+                var(--mobile-player-height) +
+                var(--mobile-nav-height) +
+                18px
+            );
+    }
+
+
+    .main {
+        margin-left: 0 !important;
+        width: 100% !important;
+
+        padding:
+            12px
+            12px
+            20px;
+
+        min-width: 0;
+    }
+
+
+    /* ---------- MOBILE TOP BAR ---------- */
+
+    .topbar {
+        width: 100%;
+
+        display: grid;
+
+        grid-template-columns:
+            minmax(0, 1fr)
+            auto;
+
+        gap: 10px;
+
+        margin-bottom: 18px;
+    }
+
+
+    .mobile-logo {
+        grid-column: 1 / -1;
+
+        width: 100%;
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 8px;
+
+        font-size: 20px;
+
+        line-height: 1;
+
+        margin-bottom: 3px;
+    }
+
+
+    .search-box {
+        width: 100%;
+        min-width: 0;
+
+        height: 46px;
+
+        border-radius: 13px;
+
+        padding:
+            0 12px;
+    }
+
+
+    .search-icon {
+        flex-shrink: 0;
+        font-size: 20px;
+    }
+
+
+    .search-box input {
+        min-width: 0;
+        font-size: 14px;
+    }
+
+
+    .clear-search {
+        flex-shrink: 0;
+        width: 28px;
+        height: 36px;
+    }
+
+
+    /* Add Songs becomes an icon button */
+
+    .add-song-btn {
+        width: 46px;
+        height: 46px;
+
+        flex-shrink: 0;
+
+        padding: 0;
+
+        display: grid;
+        place-items: center;
+
+        border-radius: 13px;
+
+        font-size: 0;
+    }
+
+
+    .add-song-btn span {
+        display: block;
+        font-size: 23px;
+        line-height: 1;
+    }
+
+
+    /* ---------- BOTTOM NAVIGATION ---------- */
+
+    .sidebar {
+        position: fixed !important;
+
+        left: 0;
+        right: 0;
+
+        top: auto !important;
+        bottom: 0 !important;
+
+        width: 100% !important;
+
+        height:
+            calc(
+                var(--mobile-nav-height) +
+                env(safe-area-inset-bottom)
+            );
+
+        min-height:
+            var(--mobile-nav-height);
+
+        padding:
+            4px
+            8px
+            env(safe-area-inset-bottom);
+
+        border-right: none;
+
+        border-top:
+            1px solid
+            rgba(255,255,255,.08);
+
+        background:
+            rgba(10,8,16,.97);
+
+        backdrop-filter: blur(20px);
+
+        z-index: 1000;
+    }
+
+
+    .logo,
+    .sidebar-section,
+    .sidebar-bottom {
+        display: none !important;
+    }
+
+
+    .main-nav {
+        width: 100%;
+        height: 100%;
+
+        display: grid !important;
+
+        grid-template-columns:
+            repeat(4, minmax(0, 1fr));
+
+        gap: 3px;
+
+        align-items: stretch;
+    }
+
+
+    .nav-btn {
+        width: 100%;
+        height: 100%;
+
+        min-width: 0;
+
+        padding:
+            4px 2px;
+
+        border-radius: 10px;
+
+        display: flex !important;
+
+        flex-direction: column;
+
+        align-items: center;
+        justify-content: center;
+
+        gap: 3px;
+
+        font-size: 10px;
+
+        white-space: nowrap;
+    }
+
+
+    .nav-icon {
+        width: auto;
+
+        font-size: 19px;
+
+        line-height: 1;
+    }
+
+
+    .nav-btn.active {
+        box-shadow:
+            inset 0 2px 0 var(--accent);
+    }
+
+
+    /* ---------- SONG LIST ---------- */
+
+    .music-section {
+        width: 100%;
+        min-width: 0;
+    }
+
+
+    .section-heading {
+        gap: 10px;
+    }
+
+
+    .section-heading h2 {
+        font-size: 20px;
+    }
+
+
+    .song-list {
+        width: 100%;
+        gap: 6px;
+    }
+
+
+    .song-row {
+        width: 100%;
+
+        min-height: 62px;
+
+        display: grid;
+
+        /*
+         * cover | song info | favorite | play
+         */
+        grid-template-columns:
+            48px
+            minmax(0, 1fr)
+            36px
+            38px;
+
+        gap: 7px;
+
+        padding:
+            6px 5px;
+
+        border-radius: 11px;
+
+        transform: none !important;
+    }
+
+
+    .song-row:hover {
+        transform: none !important;
+    }
+
+
+    .song-number {
+        display: none !important;
+    }
+
+
+    .song-cover {
+        width: 48px !important;
+        height: 48px !important;
+
+        border-radius: 9px;
+    }
+
+
+    .song-details {
+        min-width: 0;
+        overflow: hidden;
+    }
+
+
+    .song-details strong {
+        display: block;
+
+        max-width: 100%;
+
+        font-size: 14px;
+
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+
+    .song-details span {
+        display: block;
+
+        max-width: 100%;
+
+        font-size: 11px;
+
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+
+    .song-playing-label {
+        display: none !important;
+    }
+
+
+    .row-like,
+    .row-play {
+        width: 36px;
+        height: 36px;
+
+        flex-shrink: 0;
+    }
+
+
+    /* ---------- HERO ---------- */
+
+    .hero {
+        width: 100%;
+        min-width: 0;
+
+        padding: 25px 18px;
+
+        border-radius: 18px;
+    }
+
+
+    .hero h1 {
+        font-size:
+            clamp(
+                28px,
+                9vw,
+                42px
+            );
+
+        line-height: 1.05;
+    }
+
+
+    .hero p {
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+
+    /* ---------- PLAYLIST ---------- */
+
+    .playlist-header {
+        width: 100%;
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 14px;
+
+        padding:
+            18px 0;
+    }
+
+
+    .playlist-art {
+        width: 90px !important;
+        height: 90px !important;
+
+        flex-shrink: 0;
+
+        border-radius: 14px;
+
+        font-size: 38px !important;
+    }
+
+
+    .playlist-header > div:last-child {
+        min-width: 0;
+    }
+
+
+    .playlist-header h1 {
+        max-width: 100%;
+
+        font-size:
+            clamp(
+                22px,
+                7vw,
+                30px
+            );
+
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+
+    .playlist-actions {
+        width: 100%;
+
+        display: grid;
+
+        grid-template-columns:
+            1fr 1fr;
+
+        gap: 8px;
+    }
+
+
+    .play-all-btn,
+    .delete-playlist-btn {
+        min-height: 44px;
+
+        width: 100%;
+
+        padding:
+            9px 10px;
+
+        font-size: 13px;
+    }
+
+
+    /* ---------- MUSIC PLAYER ---------- */
+
+    .music-player {
+        position: fixed !important;
+
+        left: 0;
+        right: 0;
+
+        bottom:
+            calc(
+                var(--mobile-nav-height) +
+                env(safe-area-inset-bottom)
+            );
+
+        width: 100%;
+
+        height: var(--mobile-player-height);
+
+        min-height: var(--mobile-player-height);
+
+        display: grid !important;
+
+        grid-template-columns: 1fr !important;
+
+        grid-template-rows:
+            54px
+            62px;
+
+        gap: 4px;
+
+        padding:
+            7px
+            12px;
+
+        background:
+            rgba(10,8,16,.97);
+
+        backdrop-filter: blur(24px);
+
+        z-index: 900;
+    }
+
+
+    .current-song {
+        width: 100%;
+        min-width: 0;
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 9px;
+
+        order: 1;
+    }
+
+
+    .player-cover {
+        width: 48px !important;
+        height: 48px !important;
+
+        border-radius: 9px;
+    }
+
+
+    .current-info {
+        min-width: 0;
+        flex: 1;
+
+        overflow: hidden;
+    }
+
+
+    .current-info strong {
+        display: block;
+
+        max-width: 100%;
+
+        font-size: 13px;
+
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+
+    .current-info span {
+        display: block;
+
+        max-width: 100%;
+
+        font-size: 11px;
+
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+
+    .heart-btn {
+        width: 36px;
+        height: 36px;
+
+        flex-shrink: 0;
+    }
+
+
+    .player-center {
+        width: 100%;
+
+        min-width: 0;
+
+        order: 2;
+
+        display: flex;
+
+        flex-direction: column;
+
+        justify-content: flex-end;
+    }
+
+
+    .controls {
+        width: 100%;
+
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        gap:
+            clamp(
+                5px,
+                3vw,
+                14px
+            );
+
+        margin-bottom: 3px;
+    }
+
+
+    .control-btn {
+        width: 34px;
+        height: 34px;
+
+        flex-shrink: 0;
+
+        font-size: 15px;
+    }
+
+
+    .play-button {
+        width: 43px;
+        height: 43px;
+
+        flex-shrink: 0;
+
+        font-size: 16px;
+    }
+
+
+    .progress-container {
+        width: 100%;
+
+        gap: 6px;
+    }
+
+
+    .progress-container span {
+        min-width: 29px;
+
+        font-size: 9px;
+    }
+
+
+    input[type="range"] {
+        min-width: 0;
+
+        height: 4px;
+    }
+
+
+    .volume-control {
+        display: none !important;
+    }
+
+
+    /* ---------- TOAST ---------- */
+
+    #toast {
+        max-width:
+            calc(100vw - 30px);
+
+        width: max-content;
+
+        text-align: center;
+
+        bottom:
+            calc(
+                var(--mobile-nav-height) +
+                var(--mobile-player-height) +
+                15px
+            );
+
+        padding:
+            10px 14px;
+
+        font-size: 12px;
+    }
+
+
+    /* ---------- DIALOGS ---------- */
+
+    dialog {
+        width:
+            calc(
+                100vw - 24px
+            );
+
+        max-width:
+            calc(
+                100vw - 24px
+            );
+
+        max-height:
+            calc(
+                100dvh - 24px
+            );
+
+        margin: auto;
+
+        padding: 18px;
+
+        border-radius: 16px;
+
+        overflow: hidden;
+    }
+
+
+    dialog form {
+        max-height:
+            calc(
+                100dvh - 60px
+            );
+
+        overflow-y: auto;
+
+        overflow-x: hidden;
+    }
+
+
+    .playlist-dialog-header {
+        gap: 10px;
+    }
+
+
+    .playlist-dialog-header h2 {
+        font-size: 20px;
+    }
+
+
+    .playlist-dialog-header p {
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+
+    .dialog-buttons {
+        display: grid;
+
+        grid-template-columns:
+            1fr 1fr;
+
+        gap: 8px;
+
+        margin-top: 18px;
+    }
+
+
+    .dialog-buttons button {
+        width: 100%;
+
+        min-height: 44px;
+
+        padding:
+            9px 10px;
+    }
+
+
+    .upload-area {
+        padding: 22px 12px;
+    }
+
+
+    .playlist-song-selector,
+    .playlist-checklist {
+        max-height:
+            min(
+                280px,
+                35dvh
+            );
+    }
+}
+
+
+/* =========================================================
+   VERY SMALL PHONES
+   380px AND BELOW
+   ========================================================= */
+
+@media (max-width: 380px) {
+
+    .main {
+        padding-left: 9px;
+        padding-right: 9px;
+    }
+
+
+    .mobile-logo {
+        font-size: 18px;
+    }
+
+
+    .song-row {
+        grid-template-columns:
+            44px
+            minmax(0, 1fr)
+            32px
+            34px;
+
+        gap: 5px;
+
+        padding:
+            5px 3px;
+    }
+
+
+    .song-cover {
+        width: 44px !important;
+        height: 44px !important;
+    }
+
+
+    .row-like,
+    .row-play {
+        width: 32px;
+        height: 32px;
+
+        font-size: 13px;
+    }
+
+
+    .song-details strong {
+        font-size: 13px;
+    }
+
+
+    .song-details span {
+        font-size: 10px;
+    }
+
+
+    .controls {
+        gap: 3px;
+    }
+
+
+    .control-btn {
+        width: 31px;
+        height: 31px;
+    }
+
+
+    .play-button {
+        width: 40px;
+        height: 40px;
+    }
+
+
+    .nav-btn {
+        font-size: 9px;
+    }
+
+
+    .nav-icon {
+        font-size: 17px;
+    }
+
+
+    .playlist-actions {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* =========================================================
+   LANDSCAPE PHONES
+   ========================================================= */
+
+@media (max-width: 900px) and (orientation: landscape) {
+
+    .music-player {
+        --mobile-player-height: 108px;
+
+        grid-template-rows:
+            48px
+            48px;
+
+        height: 108px;
+        min-height: 108px;
+    }
+
+
+    .app {
+        padding-bottom:
+            calc(
+                108px +
+                var(--mobile-nav-height) +
+                15px
+            );
+    }
+
+
+    .player-cover {
+        width: 42px !important;
+        height: 42px !important;
+    }
+
+
+    .controls {
+        margin-bottom: 1px;
+    }
+
+
+    .control-btn {
+        width: 32px;
+        height: 32px;
+    }
+
+
+    .play-button {
+        width: 39px;
+        height: 39px;
+    }
+}
+
+
+/* =========================================================
+   TOUCH DEVICES
+   ========================================================= */
+
+@media (hover: none) and (pointer: coarse) {
+
+    .song-row:hover,
+    .add-song-btn:hover,
+    .play-all-btn:hover,
+    .nav-btn:hover {
+        transform: none;
+    }
+
+
+    .control-btn,
+    .row-like,
+    .row-play,
+    .heart-btn,
+    .nav-btn,
+    .add-song-btn,
+    .play-all-btn {
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+
+    input[type="range"] {
+        height: 6px;
+    }
+
+
+    input[type="range"]::-webkit-slider-thumb {
+        width: 16px;
+        height: 16px;
+        opacity: 1;
+    }
+}
+
+
+/* =========================================================
+   SAFE AREA SUPPORT - iPHONE / MODERN PHONES
+   ========================================================= */
+
+@supports (padding: env(safe-area-inset-bottom)) {
+
+    .sidebar {
+        padding-bottom:
+            max(
+                4px,
+                env(safe-area-inset-bottom)
+            );
+    }
+}
+/* =========================================================
+   VIBEMUSIC RESPONSIVE UPGRADE
+   SAFE CSS ONLY
+   Does NOT modify the audio/player JavaScript
+   ========================================================= */
+
+/* ---------- GLOBAL RESPONSIVE SAFETY ---------- */
+
+html {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+* {
+    min-width: 0;
+}
+
+img {
+    max-width: 100%;
+}
+
+
+/* =========================================================
+   LARGE DESKTOP
+   ========================================================= */
+
+@media (min-width: 1200px) {
+
+    .main {
+        padding-left: 40px;
+        padding-right: 40px;
+    }
+
+    .song-list {
+        max-width: 1400px;
+    }
+
+    .music-section {
+        max-width: 1400px;
+    }
+
+}
+
+
+/* =========================================================
+   LAPTOP / SMALL DESKTOP
+   ========================================================= */
+
+@media (min-width: 701px) and (max-width: 1100px) {
+
+    .sidebar {
+        width: 220px;
+    }
+
+    .main {
+        margin-left: 220px;
+        width: calc(100% - 220px);
+        padding: 20px;
+    }
+
+    .music-player {
+        padding-left: 18px;
+        padding-right: 18px;
+        gap: 14px;
+    }
+
+    .current-song {
+        gap: 9px;
+    }
+
+    .player-cover {
+        width: 54px;
+        height: 54px;
+    }
+
+    .controls {
+        gap: 7px;
+    }
+
+    .volume-control input {
+        width: 75px;
+    }
+
+}
+
+
+/* =========================================================
+   TABLETS
+   ========================================================= */
+
+@media (min-width: 701px) and (max-width: 850px) {
+
+    .sidebar {
+        width: 190px;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .main {
+        margin-left: 190px;
+        width: calc(100% - 190px);
+        padding: 16px;
+    }
+
+    .logo {
+        font-size: 19px;
+    }
+
+    .nav-btn {
+        padding: 11px 10px;
+        gap: 8px;
+    }
+
+    .music-player {
+        grid-template-columns:
+            minmax(180px, 1fr)
+            minmax(250px, 1.4fr)
+            minmax(120px, .7fr);
+
+        gap: 10px;
+        padding: 10px 14px;
+    }
+
+    .player-cover {
+        width: 50px;
+        height: 50px;
+    }
+
+    .volume-control input {
+        width: 65px;
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    /* Prevent page from moving underneath fixed UI */
+
+    .app {
+        min-height: 100vh;
+        padding-bottom: 175px !important;
+    }
+
+
+    /* ---------- BOTTOM NAVIGATION ---------- */
+
+    .sidebar {
+        position: fixed !important;
+
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        top: auto !important;
+
+        width: 100% !important;
+        height: 64px !important;
+
+        padding:
+            4px
+            max(5px, env(safe-area-inset-left))
+            calc(4px + env(safe-area-inset-bottom))
+            max(5px, env(safe-area-inset-right));
+
+        border-top:
+            1px solid var(--border);
+
+        border-right: none;
+
+        background:
+            rgba(10, 8, 16, .97);
+
+        backdrop-filter: blur(20px);
+
+        z-index: 500;
+    }
+
+
+    .logo,
+    .sidebar-section,
+    .sidebar-bottom {
+        display: none !important;
+    }
+
+
+    .main-nav {
+        width: 100%;
+        height: 100%;
+
+        display: grid !important;
+
+        grid-template-columns:
+            repeat(4, 1fr);
+
+        gap: 3px;
+    }
+
+
+    .nav-btn {
+        width: 100%;
+        height: 100%;
+
+        padding: 4px 2px !important;
+
+        display: flex !important;
+
+        flex-direction: column !important;
+
+        align-items: center;
+        justify-content: center;
+
+        gap: 2px;
+
+        border-radius: 10px;
+
+        font-size: 10px;
+
+        text-align: center;
+    }
+
+
+    .nav-icon {
+        width: auto;
+        font-size: 18px;
+        line-height: 1;
+    }
+
+
+    /* ---------- MAIN CONTENT ---------- */
+
+    .main {
+        width: 100% !important;
+
+        margin-left: 0 !important;
+
+        padding:
+            12px
+            12px
+            15px !important;
+    }
+
+
+    /* ---------- TOP BAR ---------- */
+
+    .topbar {
+        width: 100%;
+
+        display: grid !important;
+
+        grid-template-columns:
+            minmax(0, 1fr)
+            48px;
+
+        gap: 9px;
+
+        margin-bottom: 20px;
+    }
+
+
+    .mobile-logo {
+        grid-column: 1 / -1;
+
+        width: 100%;
+
+        display: flex !important;
+
+        align-items: center;
+
+        gap: 8px;
+
+        margin-bottom: 3px;
+
+        font-size: 21px;
+    }
+
+
+    .search-box {
+        width: 100%;
+        min-width: 0;
+
+        height: 46px;
+
+        border-radius: 13px;
+    }
+
+
+    .search-box input {
+        min-width: 0;
+
+        font-size: 14px;
+    }
+
+
+    .add-song-btn {
+        width: 48px !important;
+        height: 46px !important;
+
+        padding: 0 !important;
+
+        display: grid;
+
+        place-items: center;
+
+        border-radius: 13px;
+    }
+
+
+    .add-song-btn span {
+        font-size: 21px !important;
+    }
+
+
+    /* ---------- HERO ---------- */
+
+    .hero {
+        width: 100%;
+
+        padding: 22px 18px !important;
+
+        border-radius: 18px;
+
+        margin-bottom: 22px;
+    }
+
+
+    .hero h1 {
+        font-size:
+            clamp(28px, 9vw, 42px);
+
+        line-height: 1.05;
+    }
+
+
+    .hero p {
+        font-size: 13px;
+
+        max-width: 250px;
+    }
+
+
+    /* ---------- SECTION HEADER ---------- */
+
+    .section-heading {
+        gap: 10px;
+
+        align-items: center;
+
+        margin-bottom: 12px;
+    }
+
+
+    .section-heading h2 {
+        font-size: 19px;
+    }
+
+
+    .section-heading span {
+        font-size: 11px;
+    }
+
+
+    .play-all-btn {
+        flex-shrink: 0;
+
+        padding:
+            8px
+            11px !important;
+
+        font-size: 11px;
+    }
+
+
+    /* =====================================================
+       SONG ROW
+       ===================================================== */
+
+    .song-list {
+        width: 100%;
+
+        gap: 6px;
+    }
+
+
+    .song-row {
+        width: 100% !important;
+
+        min-height: 64px;
+
+        display: grid !important;
+
+        grid-template-columns:
+            25px
+            46px
+            minmax(0, 1fr)
+            36px
+            38px !important;
+
+        gap: 7px !important;
+
+        padding:
+            7px 6px !important;
+
+        border-radius: 12px;
+    }
+
+
+    .song-number {
+        width: 25px;
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        font-size: 11px;
+    }
+
+
+    .song-cover {
+        width: 46px !important;
+        height: 46px !important;
+
+        border-radius: 9px;
+    }
+
+
+    .song-details {
+        min-width: 0;
+
+        overflow: hidden;
+
+        display: flex;
+
+        flex-direction: column;
+
+        justify-content: center;
+    }
+
+
+    .song-details strong {
+        display: block;
+
+        width: 100%;
+
+        font-size: 13px;
+
+        white-space: nowrap;
+
+        overflow: hidden;
+
+        text-overflow: ellipsis;
+    }
+
+
+    .song-details span {
+        display: block;
+
+        width: 100%;
+
+        margin-top: 3px;
+
+        font-size: 10px;
+
+        white-space: nowrap;
+
+        overflow: hidden;
+
+        text-overflow: ellipsis;
+
+        color: var(--muted);
+    }
+
+
+    .song-playing-label {
+        display: none !important;
+    }
+
+
+    .row-like,
+    .row-play {
+        width: 34px !important;
+        height: 34px !important;
+
+        min-width: 34px;
+
+        display: grid;
+
+        place-items: center;
+
+        border-radius: 50%;
+    }
+
+
+    .row-like {
+        font-size: 17px;
+    }
+
+
+    .row-play {
+        font-size: 13px;
+    }
+
+
+    /* =====================================================
+       MOBILE MUSIC PLAYER
+       ===================================================== */
+
+    .music-player {
+        position: fixed !important;
+
+        left: 0 !important;
+        right: 0 !important;
+
+        bottom: 64px !important;
+
+        width: 100% !important;
+
+        min-height: 0 !important;
+
+        display: grid !important;
+
+        grid-template-columns: 1fr !important;
+
+        gap: 5px !important;
+
+        padding:
+            8px
+            12px
+            7px !important;
+
+        background:
+            rgba(10, 8, 16, .98);
+
+        backdrop-filter: blur(25px);
+
+        border-top:
+            1px solid var(--border);
+
+        z-index: 400;
+    }
+
+
+    .current-song {
+        width: 100%;
+
+        min-width: 0;
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 9px;
+    }
+
+
+    .player-cover {
+        width: 45px !important;
+        height: 45px !important;
+
+        border-radius: 9px;
+    }
+
+
+    .current-info {
+        flex: 1;
+
+        min-width: 0;
+    }
+
+
+    .current-info strong {
+        display: block;
+
+        max-width: 100%;
+
+        font-size: 12px;
+
+        white-space: nowrap;
+
+        overflow: hidden;
+
+        text-overflow: ellipsis;
+    }
+
+
+    .current-info span {
+        display: block;
+
+        max-width: 100%;
+
+        font-size: 10px;
+
+        white-space: nowrap;
+
+        overflow: hidden;
+
+        text-overflow: ellipsis;
+    }
+
+
+    .heart-btn {
+        width: 34px;
+        height: 34px;
+
+        flex-shrink: 0;
+    }
+
+
+    /* ---------- PLAYER CONTROLS ---------- */
+
+    .player-center {
+        width: 100%;
+    }
+
+
+    .controls {
+        width: 100%;
+
+        display: flex;
+
+        justify-content: center;
+
+        align-items: center;
+
+        gap: 9px;
+
+        margin-bottom: 3px;
+    }
+
+
+    .control-btn {
+        width: 34px;
+        height: 34px;
+
+        flex-shrink: 0;
+    }
+
+
+    .play-button {
+        width: 42px;
+        height: 42px;
+
+        flex-shrink: 0;
+    }
+
+
+    /* ---------- PROGRESS ---------- */
+
+    .progress-container {
+        width: 100%;
+
+        gap: 6px;
+    }
+
+
+    .progress-container span {
+        min-width: 29px;
+
+        font-size: 9px;
+    }
+
+
+    .progress-container input {
+        min-width: 0;
+    }
+
+
+    input[type="range"] {
+        height: 4px;
+
+        touch-action: none;
+    }
+
+
+    input[type="range"]::-webkit-slider-thumb {
+        width: 15px;
+        height: 15px;
+
+        opacity: 1;
+    }
+
+
+    /* Volume is unnecessary on narrow mobile screens */
+
+    .volume-control {
+        display: none !important;
+    }
+
+
+    /* =====================================================
+       PLAYLIST PAGE
+       ===================================================== */
+
+    .playlist-page-header {
+        display: flex;
+
+        align-items: center;
+
+        gap: 12px;
+
+        margin-bottom: 16px;
+    }
+
+
+    .playlist-page-icon {
+        width: 62px !important;
+        height: 62px !important;
+
+        flex-shrink: 0;
+
+        border-radius: 14px;
+
+        font-size: 25px;
+    }
+
+
+    .playlist-page-header h1 {
+        font-size: 24px;
+
+        max-width: 100%;
+
+        overflow-wrap: anywhere;
+    }
+
+
+    .playlist-actions {
+        display: flex;
+
+        flex-wrap: wrap;
+
+        gap: 8px;
+
+        margin-bottom: 15px;
+    }
+
+
+    .playlist-actions button {
+        flex: 1;
+
+        min-width: 130px;
+    }
+
+
+    /* =====================================================
+       PLAYLIST DIALOG
+       ===================================================== */
+
+    dialog {
+        width:
+            calc(100% - 20px) !important;
+
+        max-width: 480px;
+
+        max-height:
+            calc(100vh - 30px);
+
+        padding: 18px !important;
+
+        border-radius: 17px;
+
+        overflow: auto;
+    }
+
+
+    .playlist-dialog-header {
+        gap: 10px;
+
+        margin-bottom: 14px;
+    }
+
+
+    .playlist-dialog-header h2 {
+        font-size: 20px;
+    }
+
+
+    .playlist-song-selector {
+        max-height:
+            min(300px, 42vh);
+    }
+
+
+    .playlist-checklist {
+        max-height:
+            min(300px, 42vh);
+    }
+
+
+    .dialog-buttons {
+        display: grid;
+
+        grid-template-columns:
+            1fr 1fr;
+
+        gap: 8px;
+
+        margin-top: 18px;
+    }
+
+
+    .dialog-buttons button {
+        width: 100%;
+
+        min-height: 42px;
+    }
+
+
+    /* =====================================================
+       TOAST
+       ===================================================== */
+
+    #toast {
+        left: 50%;
+
+        bottom: 145px;
+
+        width: max-content;
+
+        max-width:
+            calc(100% - 30px);
+
+        text-align: center;
+
+        font-size: 12px;
+
+        padding:
+            10px
+            14px;
+    }
+
+
+    /* =====================================================
+       FOOTER
+       ===================================================== */
+
+    .developer-footer {
+        padding:
+            25px
+            10px
+            185px;
+    }
+
+}
+
+
+/* =========================================================
+   VERY SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 380px) {
+
+    .main {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+    }
+
+
+    .song-row {
+        grid-template-columns:
+            20px
+            42px
+            minmax(0, 1fr)
+            32px
+            34px !important;
+
+        gap: 5px !important;
+
+        padding-left: 4px !important;
+        padding-right: 4px !important;
+    }
+
+
+    .song-cover {
+        width: 42px !important;
+        height: 42px !important;
+    }
+
+
+    .row-like,
+    .row-play {
+        width: 31px !important;
+        height: 31px !important;
+
+        min-width: 31px;
+    }
+
+
+    .song-details strong {
+        font-size: 12px;
+    }
+
+
+    .song-details span {
+        font-size: 9px;
+    }
+
+
+    .controls {
+        gap: 5px;
+    }
+
+
+    .control-btn {
+        width: 32px;
+        height: 32px;
+    }
+
+
+    .play-button {
+        width: 40px;
+        height: 40px;
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE LANDSCAPE
+   ========================================================= */
+
+@media (max-width: 900px) and (orientation: landscape) {
+
+    .music-player {
+        grid-template-columns:
+            minmax(170px, 1fr)
+            minmax(250px, 1.5fr) !important;
+
+        align-items: center;
+
+        min-height: 82px !important;
+
+        gap: 10px !important;
+
+        padding:
+            6px
+            12px !important;
+    }
+
+
+    .current-song {
+        order: 1;
+    }
+
+
+    .player-center {
+        order: 2;
+    }
+
+
+    .sidebar {
+        height: 58px !important;
+    }
+
+
+    .music-player {
+        bottom: 58px !important;
+    }
+
+
+    .app {
+        padding-bottom: 145px !important;
+    }
+
+
+    .nav-btn {
+        flex-direction: row !important;
+
+        gap: 6px;
+
+        font-size: 11px;
+    }
+
+
+    .nav-icon {
+        font-size: 16px;
+    }
+
+}
